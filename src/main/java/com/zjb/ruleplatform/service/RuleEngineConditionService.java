@@ -1,10 +1,13 @@
 package com.zjb.ruleplatform.service;
 
-import com.founder.ego.common.request.PageRequest;
-import com.founder.ego.common.response.PageResult;
-import com.founder.ego.common.response.PlainResult;
-import com.founder.ego.store.bpm.entity.RuleEngineCondition;
-import com.founder.ego.vo.ruleengine.*;
+
+import com.zjb.ruleplatform.entity.RuleEngineCondition;
+import com.zjb.ruleplatform.entity.common.PageRequest;
+import com.zjb.ruleplatform.entity.common.PageResult;
+import com.zjb.ruleplatform.entity.common.PlainResult;
+import com.zjb.ruleplatform.entity.dto.AddRuleEngineConditionParam;
+import com.zjb.ruleplatform.entity.dto.IdAndName;
+import com.zjb.ruleplatform.entity.dto.RuleEngineConditionResponse;
 
 import java.util.List;
 
@@ -17,15 +20,9 @@ public interface RuleEngineConditionService {
      *
      * @return lis
      */
-    PageResult<RuleEngineConditionResponse> list(PageRequest<RuleEngineConditionRequest> pageRequest);
+    PageResult<RuleEngineConditionResponse> list(PageRequest<String> pageRequest);
 
-    /**
-     * 删除条件
-     *
-     * @param id 条件id
-     * @return true表示删除成功
-     */
-    Boolean delete(Integer id);
+
 
     /**
      * 添加条件
@@ -41,7 +38,7 @@ public interface RuleEngineConditionService {
      * @param id 条件id
      * @return data
      */
-    GetRuleEngineConditionResponse get(Long id);
+    AddRuleEngineConditionParam get(Long id);
 
     /**
      * 更新条件
@@ -49,15 +46,9 @@ public interface RuleEngineConditionService {
      * @param update 条件信息
      * @return 返回更新后的数据
      */
-    GetRuleEngineConditionResponse update(UpdateRuleEngineBizRequest update);
+    AddRuleEngineConditionParam update(AddRuleEngineConditionParam update);
 
-    /**
-     * 条件验重接口
-     *
-     * @param name 条件名称
-     * @return true时条件已经存在
-     */
-    PlainResult<Boolean> validateUniqName(String name);
+
 
     /**
      * 生成条件值
@@ -68,12 +59,6 @@ public interface RuleEngineConditionService {
     void generateConditionValue(RuleEngineCondition condition, AddRuleEngineConditionParam add);
 
 
-    /**
-     * 条件被多少规则引用
-     *
-     * @return 返回被规则引用的数量
-     */
-    Integer useCount(Integer id);
 
     /**
      * 根据Ids批量查询条件

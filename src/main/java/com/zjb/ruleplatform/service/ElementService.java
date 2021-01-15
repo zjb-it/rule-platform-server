@@ -24,7 +24,7 @@ public interface ElementService {
      * @param pageRequest
      * @return
      */
-    PageResult<ElementResponse> selectElementPageList(PageRequest<ElementRequest> pageRequest);
+    PageResult<ElementResponse> selectElementPageList(PageRequest<String> pageRequest);
 
     /**
      * 根据ID查询
@@ -42,33 +42,8 @@ public interface ElementService {
      */
     ElementResponse add(ElementAddRequest elementAddRequest);
 
-    /**
-     * 逻辑删除元素(要判断是否在用)
-     *
-     * @param id
-     * @return
-     */
-    Boolean delete(Integer id);
 
-    /**
-     * 更新元素信息(只允许更新 名称与描述)
-     *
-     * @param elementUpdateRequest
-     * @return
-     */
-    Boolean update(ElementUpdateRequest elementUpdateRequest);
-
-    /**
-     * 唯一约束(code全局唯一)
-     *
-     * @param code
-     * @return
-     */
-    PlainResult<Boolean> vaildateUniqCode(String code);
-
-
-
-    List<ElementResponse> getByIds(List<Integer> ids);
+    List<ElementResponse> listByIds(List<Integer> ids);
 
 
 }

@@ -12,7 +12,6 @@ import javax.validation.constraints.Pattern;
  *
  * @author v-lixing.ea
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
 public class ElementAddRequest  {
 

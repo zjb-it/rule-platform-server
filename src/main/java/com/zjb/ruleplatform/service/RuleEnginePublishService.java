@@ -1,6 +1,5 @@
 package com.zjb.ruleplatform.service;
 
-import com.founder.ego.vo.ruleengine.RulePublishRequest;
 
 /**
  * 规则引擎加载规则集
@@ -15,5 +14,5 @@ public interface RuleEnginePublishService {
      * @param rulePublishRequest 规则id/版本/环境信息
      * @return true
      */
-    Boolean publish(RulePublishRequest rulePublishRequest);
+    //Boolean publish(RulePublishRequest rulePublishRequest);
 }

@@ -13,6 +13,13 @@ public class PlainResult<T> extends BaseResult {
 		return data;
 	}
 
+	public PlainResult() {
+	}
+
+	public PlainResult(T data) {
+		this.data = data;
+	}
+
 	public void setData(T data) {
 		this.data = data;
 	}

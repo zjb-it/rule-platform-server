@@ -1,29 +1,28 @@
 package com.zjb.ruleplatform.service;
 
-import com.founder.ego.common.request.PageRequest;
-import com.founder.ego.common.response.PageResult;
-import com.founder.ego.vo.ruleengine.*;
+
+import com.zjb.ruleplatform.entity.common.PageRequest;
+import com.zjb.ruleplatform.entity.common.PageResult;
+import com.zjb.ruleplatform.entity.dto.ListRuleEngineVariableRequest;
+import com.zjb.ruleplatform.entity.dto.RuleEngineVariableRequest;
+import com.zjb.ruleplatform.entity.vo.GetRuleEngineVariableResponse;
+import com.zjb.ruleplatform.entity.vo.ListRuleEngineVariableResponse;
 
 /**
  * @author yuzhiji
  */
 public interface RuleEngineVariableService {
 
-    Boolean deleteVariable(CommonIdParam commonIdParam);
 
-    Boolean validateUniqName(CommonNameParam commonNameParam);
+    GetRuleEngineVariableResponse getVariable(Long variableId);
 
-    GetRuleEngineVariableResponse getVariable(CommonIdParam commonIdParam);
-
-    Boolean updateVariable(RuleEngineVariableRequest ruleEngineVariableRequest);
 
     PageResult<ListRuleEngineVariableResponse> listVariable(PageRequest<ListRuleEngineVariableRequest> pageRequest);
 
     GetRuleEngineVariableResponse addVariable(RuleEngineVariableRequest param);
 
-    CountVo countVariable(Long variableId);
 
-    RuleEngineVariableList getVariableList(CommonIdListParam commonIdListParam);
+
 
 
 }
