@@ -41,10 +41,9 @@ public class GetRuleEngineVariableResponse {
 
     private int id;
     private String valueDataType;
-    private String valueType;
     private String name;
     private String description;
     private String value;
-    private FunctionBean function;
+    private FunctionVo function;
 
 }

@@ -1,29 +1,23 @@
 package com.zjb.ruleplatform.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.zjb.ruleengine.core.RuleEngine;
 import com.zjb.ruleengine.core.config.FunctionHolder;
-import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleengine.core.function.Function;
 import com.zjb.ruleplatform.entity.*;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.ListRuleEngineVariableRequest;
 import com.zjb.ruleplatform.entity.dto.RuleEngineVariableRequest;
-import com.zjb.ruleplatform.entity.vo.FunctionBean;
+import com.zjb.ruleplatform.entity.vo.FunctionVo;
 import com.zjb.ruleplatform.entity.vo.GetRuleEngineVariableResponse;
 import com.zjb.ruleplatform.entity.vo.ListRuleEngineVariableResponse;
 import com.zjb.ruleplatform.manager.*;
 import com.zjb.ruleplatform.service.RuleEngineVariableService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +53,7 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
         ruleEngineVariable.setDescription(param.getDescription());
         final Function function1 = functionHolder.getFunction(param.getValue());
 
-        FunctionBean function = param.getFunction();
+        FunctionVo function = param.getFunction();
         ruleEngineVariableManager.save(ruleEngineVariable);
         saveBatchVariableParam(ruleEngineVariable, function, function1);
 
@@ -76,20 +70,20 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
 
     @Override
     public PageResult<ListRuleEngineVariableResponse> listVariable(PageRequest<ListRuleEngineVariableRequest> pageRequest) {
-        ListRuleEngineVariableRequest ruleEngineVariableRequest = pageRequest.getQuery();
-        PageRequest.PageBase page = pageRequest.getPage();
         QueryWrapper<RuleEngineVariable> queryWrapper = new QueryWrapper<>();
-
-        List<String> valueDataType = ruleEngineVariableRequest.getValueDataType();
-
-        if (CollectionUtils.isNotEmpty(valueDataType)) {
-            queryWrapper.lambda().in(RuleEngineVariable::getValueDataType, valueDataType);
+        ListRuleEngineVariableRequest ruleEngineVariableRequest = pageRequest.getQuery();
+        if (Objects.nonNull(ruleEngineVariableRequest)) {
+            List<String> valueDataType = ruleEngineVariableRequest.getValueDataType();
+            if (CollectionUtils.isNotEmpty(valueDataType)) {
+                queryWrapper.lambda().in(RuleEngineVariable::getValueDataType, valueDataType);
+            }
+            String queryName = ruleEngineVariableRequest.getName();
+            if (StringUtils.isNotBlank(queryName)) {
+                queryWrapper.lambda().like(RuleEngineVariable::getName, queryName);
+            }
         }
-        String queryName = ruleEngineVariableRequest.getName();
-        if (StringUtils.isNotBlank(queryName)) {
-            queryWrapper.lambda().like(RuleEngineVariable::getName, queryName);
-        }
 
+        PageRequest.PageBase page = pageRequest.getPage();
         //排序
         IPage<RuleEngineVariable> pageInfo = ruleEngineVariableManager.page(new Page<>(page.getPageIndex(), page.getPageSize()), queryWrapper);
         List<RuleEngineVariable> ruleEngineVariableList = pageInfo.getRecords();
@@ -102,10 +96,12 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
                     response.setName(ruleEngineVariable.getName());
                     response.setValue(ruleEngineVariable.getValue());
                     response.setValueDataType(ruleEngineVariable.getValueDataType());
+                    response.setFunctionName(ruleEngineVariable.getFunctionName());
                     return response;
                 }).collect(Collectors.toList());
         PageResult<ListRuleEngineVariableResponse> pageResult = new PageResult<>();
         pageResult.setData(ruleEngineVariableResponses);
+        pageResult.setTotal(pageInfo.getTotal());
         return pageResult;
     }
 
@@ -122,14 +118,14 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
         ruleEngineVariableResponse.setValueDataType(ruleEngineVariable.getValueDataType());
         ruleEngineVariableResponse.setValue(ruleEngineVariable.getValue());
 
-        FunctionBean functionBean = new FunctionBean();
+        FunctionVo functionBean = new FunctionVo();
         functionBean.setName(ruleEngineVariable.getValue());
         List<RuleEngineVariableParam> ruleEngineFunctionParamList = ruleEngineVariableParamManager
                 .lambdaQuery()
                 .eq(RuleEngineVariableParam::getVariableId, variableId)
                 .list();
-        List<FunctionBean.VariablesBean> variableBeanList = ruleEngineFunctionParamList.stream().map(ruleEngineFunctionParam -> {
-            FunctionBean.VariablesBean variablesBean = new FunctionBean.VariablesBean();
+        List<FunctionVo.VariablesBean> variableBeanList = ruleEngineFunctionParamList.stream().map(ruleEngineFunctionParam -> {
+            FunctionVo.VariablesBean variablesBean = new FunctionVo.VariablesBean();
             variablesBean.setCode(ruleEngineFunctionParam.getFunctionParamCode());
             variablesBean.setName(ruleEngineFunctionParam.getFunctionParamName());
             variablesBean.setValueDataType(ruleEngineFunctionParam.getFunctionParamDataType());
@@ -146,13 +142,13 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
 
     }
 
-    private void saveBatchVariableParam(RuleEngineVariable ruleEngineVariable, FunctionBean functionParam, Function function1) {
+    private void saveBatchVariableParam(RuleEngineVariable ruleEngineVariable, FunctionVo functionParam, Function function1) {
         List<RuleEngineVariableParam> ruleEngineVariableParamList = new ArrayList<>();
-        final List<FunctionBean.VariablesBean> variablesBeanList = functionParam.getVariables();
-        final List<Function.Parameter> funParameters = function1.listParamters();
+        final List<FunctionVo.VariablesBean> variablesBeanList = functionParam.getVariables();
+        //final List<Function.Parameter> funParameters = function1.listParamters();
         //todo 校验入参和函数的参数是否相对应
         if (variablesBeanList != null) {
-            for (FunctionBean.VariablesBean variablesBean : variablesBeanList) {
+            for (FunctionVo.VariablesBean variablesBean : variablesBeanList) {
                 String value = variablesBean.getValue();
 
                 RuleEngineVariableParam ruleEngineVariableParam = new RuleEngineVariableParam();

@@ -50,6 +50,8 @@ public class RuleEngineVariable implements Serializable {
 
     private String valueDataType;
 
+    private String functionName;
+
     /**
      * 创建时间，
      */
@@ -60,7 +62,7 @@ public class RuleEngineVariable implements Serializable {
     /**
      * ，
      */
-    @TableLogic
+    //@TableLogic
     private Boolean deleted;
 
     /**

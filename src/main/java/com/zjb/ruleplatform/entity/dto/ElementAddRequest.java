@@ -16,7 +16,7 @@ import javax.validation.constraints.Pattern;
 public class ElementAddRequest  {
 
     @NotBlank(message = "元素类型不能为空")
-    private String valueType;
+    private String valueDataType;
 
     @Pattern(regexp = "^[0-9a-zA-Z_]+$", message = "只能由英文数字下划线组成。")
     @NotBlank(message = "元素code不能为空")

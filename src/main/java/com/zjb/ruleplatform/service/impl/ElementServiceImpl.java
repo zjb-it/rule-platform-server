@@ -1,7 +1,6 @@
 package com.zjb.ruleplatform.service.impl;
 
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Validator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -10,22 +9,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjb.ruleplatform.entity.*;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
-import com.zjb.ruleplatform.entity.common.PlainResult;
 import com.zjb.ruleplatform.entity.dto.ElementAddRequest;
-import com.zjb.ruleplatform.entity.dto.ElementRequest;
 import com.zjb.ruleplatform.entity.dto.ElementResponse;
-import com.zjb.ruleplatform.entity.dto.ElementUpdateRequest;
 import com.zjb.ruleplatform.manager.*;
 import com.zjb.ruleplatform.service.ElementService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import javax.validation.ValidationException;
+import javax.xml.crypto.dsig.keyinfo.PGPData;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author v-lixing.ea
@@ -49,18 +44,17 @@ public class ElementServiceImpl implements ElementService {
         if (Validator.isNotEmpty(query)) {
             queryWrapper.lambda().like(RuleEngineElement::getCodeName, query);
         }
+        queryWrapper.lambda().orderByDesc(RuleEngineElement::getId);
         IPage<RuleEngineElement> pageData = ruleEngineElementManager.page(new Page<>(page.getPageIndex(), page.getPageSize()), queryWrapper);
         List<RuleEngineElement> ruleEngineElements = pageData.getRecords();
         List<ElementResponse> elementResponses = ruleEngineElements.stream().map(e -> {
             ElementResponse elementResponse = new ElementResponse();
-            elementResponse.setId(e.getId().intValue());
-            elementResponse.setName(e.getName());
-            elementResponse.setCode(e.getCode());
-            elementResponse.setDescription(e.getDescription());
+            BeanUtils.copyProperties(e,elementResponse);
             return elementResponse;
         }).collect(Collectors.toList());
         PageResult<ElementResponse> result = new PageResult<>();
         result.setData(elementResponses);
+        result.setTotal(pageData.getTotal());
         return result;
     }
 
@@ -72,17 +66,14 @@ public class ElementServiceImpl implements ElementService {
 
         ruleEngineElement.setName(elementAddRequest.getName());
         ruleEngineElement.setCode(code);
-        ruleEngineElement.setValueType(elementAddRequest.getValueType());
+        ruleEngineElement.setValueDataType(elementAddRequest.getValueDataType());
         ruleEngineElement.setDescription(elementAddRequest.getDescription());
         ruleEngineElement.setCodeName(code + elementAddRequest.getName());
 
         ruleEngineElementManager.save(ruleEngineElement);
         ElementResponse elementResponse = new ElementResponse();
         /*新建一个元素返回*/
-        elementResponse.setCode(ruleEngineElement.getCode());
-        elementResponse.setDescription(ruleEngineElement.getDescription());
-        elementResponse.setId(ruleEngineElement.getId().intValue());
-        elementResponse.setName(ruleEngineElement.getName());
+        BeanUtils.copyProperties(ruleEngineElement,elementResponse);
 
         return elementResponse;
     }
@@ -95,10 +86,7 @@ public class ElementServiceImpl implements ElementService {
         if (Validator.isEmpty(ruleEngineElement)) {
             return elementResponse;
         }
-        elementResponse.setId(ruleEngineElement.getId().intValue());
-        elementResponse.setName(ruleEngineElement.getName());
-        elementResponse.setCode(ruleEngineElement.getCode());
-        elementResponse.setDescription(ruleEngineElement.getDescription());
+        BeanUtils.copyProperties(ruleEngineElement,elementResponse);
         return elementResponse;
     }
 
@@ -111,10 +99,7 @@ public class ElementServiceImpl implements ElementService {
         List<RuleEngineElement> ruleEngineElements = ruleEngineElementManager.list(queryWrapper);
         return ruleEngineElements.stream().map(e -> {
             ElementResponse elementResponse = new ElementResponse();
-            elementResponse.setId(e.getId().intValue());
-            elementResponse.setName(e.getName());
-            elementResponse.setCode(e.getCode());
-            elementResponse.setDescription(e.getDescription());
+            BeanUtils.copyProperties(e,elementResponse);
             return elementResponse;
         }).collect(Collectors.toList());
     }

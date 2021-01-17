@@ -36,7 +36,7 @@ public class RuleEngineElement implements Serializable {
 
     private String code;
 
-    private String valueType;
+    private String valueDataType;
 
     /**
      * 创建时间，

@@ -12,7 +12,7 @@
  */
 package com.zjb.ruleplatform.entity.dto;
 
-import com.zjb.ruleplatform.entity.vo.FunctionBean;
+import com.zjb.ruleplatform.entity.vo.FunctionVo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -42,6 +42,6 @@ public class RuleEngineVariableRequest  {
     private String description;
     private String value;
     @NotNull
-    private FunctionBean function;
+    private FunctionVo function;
 
 }

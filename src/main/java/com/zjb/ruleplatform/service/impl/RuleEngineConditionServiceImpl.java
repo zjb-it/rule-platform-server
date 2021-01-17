@@ -264,7 +264,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
             if (byId == null) {
                 throw new ValidationException("左值元素不存在");
             }
-            condition.setLeftDataType(byId.getValueType());
+            condition.setLeftDataType(byId.getValueDataType());
         } /*else if (Objects.equals(type, VariableTypeEnum.RESULT.getStatus())) {
             //默认ValueType为COLLECTION
             condition.setLeftDataType(leftType = DataType.COLLECTION.name());

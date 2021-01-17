@@ -26,6 +26,13 @@ public class ListResult<T> extends BaseResult {
 		this.count = count;
 	}
 
+	public ListResult(List<T> data) {
+		this.data = data;
+	}
+
+	public ListResult() {
+	}
+
 	@Override
 	public String toString() {
 		return "ListResult [data=" + data + ", count=" + count + "]";

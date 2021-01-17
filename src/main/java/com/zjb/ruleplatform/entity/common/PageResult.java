@@ -22,13 +22,13 @@ public class PageResult<T> extends ListResult<T>{
      * 记录数
      *
      */
-    private Integer total;
+    private Long total;
 
-    public Integer getTotal() {
+    public Long getTotal() {
         return total;
     }
 
-    public void setTotal(Integer total) {
+    public void setTotal(Long total) {
         this.total = total;
     }
 

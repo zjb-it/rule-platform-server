@@ -12,6 +12,7 @@
  */
 package com.zjb.ruleplatform.entity.vo;
 
+import com.zjb.ruleplatform.util.DataTypeUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -38,7 +39,10 @@ public class ListRuleEngineVariableResponse {
     private String name;
     private String value;
     private String valueDataType;
+    private String functionName;
 
-
+    public String getValueDataType() {
+        return DataTypeUtils.getName(valueDataType);
+    }
 
 }
