@@ -18,6 +18,7 @@ import com.zjb.ruleplatform.manager.*;
 import com.zjb.ruleplatform.service.RuleEngineVariableService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,8 +36,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RuleEngineVariableServiceImpl implements RuleEngineVariableService {
 
-    //@Autowired
-    private FunctionHolder functionHolder= new FunctionHolder();
+    @Autowired
+    private FunctionHolder functionHolder;
     @Resource
     private RuleEngineVariableManager ruleEngineVariableManager;
     @Resource
@@ -49,11 +50,12 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
 
         RuleEngineVariable ruleEngineVariable = new RuleEngineVariable();
         ruleEngineVariable.setName(param.getName());
-        ruleEngineVariable.setValue(param.getValue());
         ruleEngineVariable.setDescription(param.getDescription());
-        final Function function1 = functionHolder.getFunction(param.getValue());
 
         FunctionVo function = param.getFunction();
+        final Function function1 = functionHolder.getFunction(function.getName());
+        ruleEngineVariable.setFunctionName(function1.getName());
+        ruleEngineVariable.setValueDataType(param.getValueDataType());
         ruleEngineVariableManager.save(ruleEngineVariable);
         saveBatchVariableParam(ruleEngineVariable, function, function1);
 
@@ -61,9 +63,8 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
         GetRuleEngineVariableResponse variableResponse = new GetRuleEngineVariableResponse();
         variableResponse.setDescription(param.getDescription());
         variableResponse.setName(param.getName());
-        variableResponse.setValue(param.getValue());
         variableResponse.setId(ruleEngineVariable.getId().intValue());
-        variableResponse.setValueDataType(function1.getFunctionResultType().getSimpleName());
+        variableResponse.setValueDataType(function1.getResultClass().getSimpleName());
         return variableResponse;
     }
 
@@ -71,6 +72,7 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
     @Override
     public PageResult<ListRuleEngineVariableResponse> listVariable(PageRequest<ListRuleEngineVariableRequest> pageRequest) {
         QueryWrapper<RuleEngineVariable> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().orderByDesc(RuleEngineVariable::getId);
         ListRuleEngineVariableRequest ruleEngineVariableRequest = pageRequest.getQuery();
         if (Objects.nonNull(ruleEngineVariableRequest)) {
             List<String> valueDataType = ruleEngineVariableRequest.getValueDataType();
@@ -94,9 +96,9 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
                     ListRuleEngineVariableResponse response = new ListRuleEngineVariableResponse();
                     response.setId(ruleEngineVariable.getId());
                     response.setName(ruleEngineVariable.getName());
-                    response.setValue(ruleEngineVariable.getValue());
                     response.setValueDataType(ruleEngineVariable.getValueDataType());
                     response.setFunctionName(ruleEngineVariable.getFunctionName());
+                    response.setDescription(ruleEngineVariable.getDescription());
                     return response;
                 }).collect(Collectors.toList());
         PageResult<ListRuleEngineVariableResponse> pageResult = new PageResult<>();
@@ -116,23 +118,23 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
         ruleEngineVariableResponse.setName(ruleEngineVariable.getName());
 
         ruleEngineVariableResponse.setValueDataType(ruleEngineVariable.getValueDataType());
-        ruleEngineVariableResponse.setValue(ruleEngineVariable.getValue());
+
 
         FunctionVo functionBean = new FunctionVo();
-        functionBean.setName(ruleEngineVariable.getValue());
+        functionBean.setName(ruleEngineVariable.getFunctionName());
         List<RuleEngineVariableParam> ruleEngineFunctionParamList = ruleEngineVariableParamManager
                 .lambdaQuery()
                 .eq(RuleEngineVariableParam::getVariableId, variableId)
                 .list();
         List<FunctionVo.VariablesBean> variableBeanList = ruleEngineFunctionParamList.stream().map(ruleEngineFunctionParam -> {
             FunctionVo.VariablesBean variablesBean = new FunctionVo.VariablesBean();
-            variablesBean.setCode(ruleEngineFunctionParam.getFunctionParamCode());
             variablesBean.setName(ruleEngineFunctionParam.getFunctionParamName());
-            variablesBean.setValueDataType(ruleEngineFunctionParam.getFunctionParamDataType());
-            final String functionParamType = ruleEngineFunctionParam.getFunctionParamType();
+            variablesBean.setDescription(ruleEngineFunctionParam.getFunctionParamDescription());
+            variablesBean.setValueDataType(ruleEngineFunctionParam.getFunctionParamValueDataType());
+            final String functionParamType = ruleEngineFunctionParam.getFunctionParamValueType();
             variablesBean.setValueType(functionParamType);
             variablesBean.setValue(ruleEngineFunctionParam.getFunctionParamValue());
-            variablesBean.setValueName(ruleEngineFunctionParam.getFunctionParamValue());
+            variablesBean.setValueDescription(ruleEngineFunctionParam.getFunctionParamValueDescription());
 
             return variablesBean;
         }).collect(Collectors.toList());
@@ -154,11 +156,12 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
                 RuleEngineVariableParam ruleEngineVariableParam = new RuleEngineVariableParam();
                 ruleEngineVariableParam.setFunctionName(functionParam.getName());
                 ruleEngineVariableParam.setVariableId(ruleEngineVariable.getId());
-                ruleEngineVariableParam.setFunctionParamType(variablesBean.getValueType());
-                ruleEngineVariableParam.setFunctionParamCode(variablesBean.getCode());
+                ruleEngineVariableParam.setFunctionParamValueType(variablesBean.getValueType());
+                ruleEngineVariableParam.setFunctionParamDescription(variablesBean.getDescription());
                 ruleEngineVariableParam.setFunctionParamValue(value);
-
-                ruleEngineVariableParam.setFunctionParamDataType(variablesBean.getValueDataType());
+                ruleEngineVariableParam.setFunctionParamName(variablesBean.getName());
+                ruleEngineVariableParam.setFunctionParamValueDescription(variablesBean.getValueDescription());
+                ruleEngineVariableParam.setFunctionParamValueDataType(variablesBean.getValueDataType());
 
                 ruleEngineVariableParamList.add(ruleEngineVariableParam);
             }

@@ -76,7 +76,7 @@ import lombok.EqualsAndHashCode;
       /**
      * ，
      */
-      @TableLogic
+      //@TableLogic
     private Boolean deleted;
 
 

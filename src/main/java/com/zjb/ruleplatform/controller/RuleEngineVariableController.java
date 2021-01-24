@@ -27,10 +27,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
@@ -80,13 +77,12 @@ public class RuleEngineVariableController {
 
 
     /**
-     * @param commonIdParam
      * @return
      */
     @ApiOperation("获取变量")
-    @PostMapping("/get")
-    public PlainResult<GetRuleEngineVariableResponse> getVariable(@RequestBody IdLRequest commonIdParam) {
-        return new PlainResult<>(ruleEngineVariableService.getVariable(commonIdParam.getId()));
+    @GetMapping("/get")
+    public PlainResult<GetRuleEngineVariableResponse> getVariable(@RequestParam Long id) {
+        return new PlainResult<>(ruleEngineVariableService.getVariable(id));
     }
 
 

@@ -1,16 +1,18 @@
 package com.zjb.ruleplatform.service.impl;
 
 
+import com.google.common.collect.ConcurrentHashMultiset;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
-import com.zjb.ruleengine.core.DefaultRuleEngine;
+import com.google.common.collect.Maps;
 import com.zjb.ruleengine.core.config.FunctionHolder;
 import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleengine.core.function.Function;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.vo.FunctionDetailVo;
-import com.zjb.ruleplatform.entity.vo.FunctionVo;
 import com.zjb.ruleplatform.service.RuleEngineFunctionService;
+import com.zjb.ruleplatform.util.DataTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,49 +28,42 @@ import java.util.stream.Collectors;
 public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService {
 
     @Autowired
-    private DefaultRuleEngine ruleEngine;
-    private static final String name = "GetPropertyFunction";
-    private static final String description = "获取对象属性";
-    private static final String object = "对象";
-    private static final String fieldName = "对象属性code";
+    private FunctionHolder functionHolder;
 
-    private static FunctionDetailVo functionVo;
+    //funciton的别名，可以自己起
+    private static final Map<String, String> functionDesc = Maps.newHashMap();
+    private static final HashBasedTable<String, String, String> functionPropertyDesc = HashBasedTable.create();
 
     static {
-        functionVo = new FunctionDetailVo();
-        functionVo.setDescription(description);
-        functionVo.setName(name);
+        functionDesc.put("GetObjectPropertyFunction", "获取java对象属性");
+        functionDesc.put("GetJsonPropertyFunction", "获取json对象属性");
 
-        FunctionDetailVo.VariablesBean var = new FunctionDetailVo.VariablesBean();
-        var.setName("object");
-        var.setDescription(object);
-        var.setValueDataType(DataTypeEnum.JSONOBJECT.name());
-        FunctionDetailVo.VariablesBean var1 = new FunctionDetailVo.VariablesBean();
-        var1.setName("fieldName");
-        var1.setDescription(fieldName);
-        var1.setValueDataType(DataTypeEnum.STRING.name());
-        functionVo.setVariables(Lists.newArrayList(var, var1));
+        functionPropertyDesc.put("GetObjectPropertyFunction", "object", "java对象");
+        functionPropertyDesc.put("GetObjectPropertyFunction", "fieldName", "对象属性code");
+        functionPropertyDesc.put("GetJsonPropertyFunction", "jsonNode", "JSON对象");
+        functionPropertyDesc.put("GetJsonPropertyFunction", "fieldName", "对象属性code");
     }
 
     @Override
-    public PageResult<FunctionDetailVo> functionLookUp(PageRequest<String> pageRequest) {
-        final FunctionHolder functionHolder = ruleEngine.getFunctionHolder();
-        //todo
-        //final Map<String, Function> functions = functionHolder.getFunctions();
-        final ArrayList<FunctionDetailVo> objects = Lists.newArrayList(functionVo);
-        //functions.forEach((k, v) -> {
-        //    final FunctionDetailVo functionVo = new FunctionDetailVo();
-        //    functionVo.setDescription(description);
-        //    functionVo.setName(k);
-        //    final List<Function.Parameter> list = v.listParamters();
-        //    final List<FunctionDetailVo.VariablesBean> collect = list.stream().map(p ->
-        //            new FunctionDetailVo.VariablesBean(p.getName(), description, p.getDataTypeEnum().name())
-        //    ).collect(Collectors.toList());
-        //    functionVo.setVariables(collect);
-        //    objects.add(functionVo);
-        //});
+    public PageResult<FunctionDetailVo> functionLookUp(String name,String valueDataType) {
+        final DataTypeEnum dataTypeByName = DataTypeEnum.getDataTypeByName(valueDataType);
+        final Map<String, Function> functions = functionHolder.getFunctions();
+        final ArrayList<FunctionDetailVo> data = Lists.newArrayList();
+        functions.forEach((k, v) -> {
+            if (DataTypeEnum.getDataTypeByClass(v.getResultClass()).getClazz().isAssignableFrom(dataTypeByName.getClazz())) {
+                final FunctionDetailVo functionVo = new FunctionDetailVo();
+                functionVo.setDescription(functionDesc.get(k));
+                functionVo.setName(k);
+                final List<Function.Parameter> list = v.getParamters();
+                final List<FunctionDetailVo.VariablesBean> collect = list.stream().map(p ->
+                        new FunctionDetailVo.VariablesBean(p.getName(), functionPropertyDesc.get(k, p.getName()), p.getDataTypeEnum().name())
+                ).collect(Collectors.toList());
+                functionVo.setVariables(collect);
+                data.add(functionVo);
+            }
+        });
         PageResult<FunctionDetailVo> result = new PageResult<>();
-        result.setData(objects);
+        result.setData(data);
         return result;
 
     }

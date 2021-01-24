@@ -41,7 +41,7 @@ import lombok.EqualsAndHashCode;
 
     private Date updateTime;
 
-    @TableLogic
+    //@TableLogic
     private Boolean deleted;
 
 

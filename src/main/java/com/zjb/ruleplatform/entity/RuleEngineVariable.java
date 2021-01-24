@@ -42,10 +42,7 @@ public class RuleEngineVariable implements Serializable {
      */
     private String code;
 
-    /**
-     * ，
-     */
-    private String value;
+
 
 
     private String valueDataType;
@@ -62,7 +59,7 @@ public class RuleEngineVariable implements Serializable {
     /**
      * ，
      */
-    //@TableLogic
+    ////@TableLogic
     private Boolean deleted;
 
     /**

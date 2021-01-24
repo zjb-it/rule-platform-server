@@ -45,7 +45,7 @@ public class RuleEngineElement implements Serializable {
 
     private Date updateTime;
 
-    //@TableLogic
+    ////@TableLogic
     private Boolean deleted;
 
     private String description;

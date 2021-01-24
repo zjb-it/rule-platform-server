@@ -32,7 +32,7 @@ public class RuleEngineElementController {
 
     @ApiOperation("元素查询")
     @PostMapping("/list")
-    public PageResult<ElementResponse> selectElementPageList(@RequestBody(required = false) PageRequest<String> pageRequest) {
+    public PageResult<ElementResponse> selectElementPageList(@RequestBody(required = false) PageRequest<ListRuleEngineVariableRequest> pageRequest) {
         return elementService.selectElementPageList(pageRequest);
     }
 

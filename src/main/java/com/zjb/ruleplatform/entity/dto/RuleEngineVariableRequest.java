@@ -40,7 +40,7 @@ public class RuleEngineVariableRequest  {
     private Long id;
     private String name;
     private String description;
-    private String value;
+    private String valueDataType;
     @NotNull
     private FunctionVo function;
 

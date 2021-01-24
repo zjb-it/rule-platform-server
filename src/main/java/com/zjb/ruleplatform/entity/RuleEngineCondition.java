@@ -70,7 +70,7 @@ public class RuleEngineCondition implements Serializable {
 
     private Date updateTime;
 
-    @TableLogic
+    //@TableLogic
     private Boolean deleted;
 
 

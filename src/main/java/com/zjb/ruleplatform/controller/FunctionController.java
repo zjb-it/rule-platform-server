@@ -13,10 +13,7 @@ import com.zjb.ruleplatform.entity.vo.FunctionVo;
 import com.zjb.ruleplatform.service.RuleEngineFunctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +33,9 @@ public class FunctionController {
      *
      * @return lis
      */
-    @PostMapping("/list")
-    public PageResult<FunctionDetailVo> list(@RequestBody PageRequest<String> pageRequest) {
-        final PageResult<FunctionDetailVo> result = functionService.functionLookUp(pageRequest);
+    @GetMapping("/list")
+    public ListResult<FunctionDetailVo> list(String name,@RequestParam(defaultValue = "POJO") String valueDataType) {
+        final PageResult<FunctionDetailVo> result = functionService.functionLookUp(name,valueDataType);
         return result;
     }
 }

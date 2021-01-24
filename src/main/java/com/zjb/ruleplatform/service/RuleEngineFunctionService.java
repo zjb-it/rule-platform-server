@@ -10,5 +10,5 @@ import com.zjb.ruleplatform.entity.vo.FunctionDetailVo;
  */
 public interface RuleEngineFunctionService {
 
-    PageResult<FunctionDetailVo> functionLookUp(PageRequest<String> pageRequest);
+    PageResult<FunctionDetailVo> functionLookUp(String name,String valueDataType);
 }

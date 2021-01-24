@@ -41,7 +41,7 @@ import lombok.EqualsAndHashCode;
       /**
      * constant,variable,element
      */
-      private String functionParamType;
+      private String functionParamValueType;
 
       /**
      * function参数code，
@@ -51,7 +51,8 @@ import lombok.EqualsAndHashCode;
       /**
      * function参数code，
      */
-      private String functionParamCode;
+      private String functionParamDescription;
+      private String functionParamValueDescription;
 
       /**
      * function参数值 ，如果是固定值就应该有，
@@ -61,7 +62,7 @@ import lombok.EqualsAndHashCode;
       /**
      * 参数的数据类型，
      */
-      private String functionParamDataType;
+      private String functionParamValueDataType;
 
       /**
      * 创建时间，
@@ -76,7 +77,7 @@ import lombok.EqualsAndHashCode;
       /**
      * ，
      */
-      @TableLogic
+      //@TableLogic
     private Boolean deleted;
 
 

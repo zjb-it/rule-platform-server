@@ -43,7 +43,6 @@ public class GetRuleEngineVariableResponse {
     private String valueDataType;
     private String name;
     private String description;
-    private String value;
     private FunctionVo function;
 
 }

@@ -4,10 +4,7 @@ package com.zjb.ruleplatform.service;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.common.PlainResult;
-import com.zjb.ruleplatform.entity.dto.ElementAddRequest;
-import com.zjb.ruleplatform.entity.dto.ElementRequest;
-import com.zjb.ruleplatform.entity.dto.ElementResponse;
-import com.zjb.ruleplatform.entity.dto.ElementUpdateRequest;
+import com.zjb.ruleplatform.entity.dto.*;
 
 import java.util.List;
 
@@ -24,7 +21,7 @@ public interface ElementService {
      * @param pageRequest
      * @return
      */
-    PageResult<ElementResponse> selectElementPageList(PageRequest<String> pageRequest);
+    PageResult<ElementResponse> selectElementPageList(PageRequest<ListRuleEngineVariableRequest> pageRequest);
 
     /**
      * 根据ID查询

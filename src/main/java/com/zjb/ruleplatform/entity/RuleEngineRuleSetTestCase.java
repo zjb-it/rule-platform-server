@@ -73,7 +73,7 @@ import lombok.EqualsAndHashCode;
       /**
      * ，
      */
-      @TableLogic
+      //@TableLogic
     private Integer deleted;
 
 

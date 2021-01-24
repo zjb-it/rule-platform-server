@@ -22,24 +22,14 @@ public class FunctionVo {
     @NoArgsConstructor
     @Data
     public static class VariablesBean {
-        /**
-         * code : contract_number
-         * name : 合同编号
-         * type : 2
-         * value : 1
-         * value_name : 元素1
-         */
 
-        private String code;
         private String name;
+        private String description;
         private String valueType;
         private String value;
-        private String valueName;
+        private String valueDescription;
         private String valueDataType;
 
-        public VariablesBean(String code, String valueDataType) {
-            this.code = code;
-            this.valueDataType = valueDataType;
-        }
+
     }
 }

@@ -1,6 +1,7 @@
 package com.zjb.ruleplatform.service.impl;
 
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Validator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -11,6 +12,7 @@ import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.ElementAddRequest;
 import com.zjb.ruleplatform.entity.dto.ElementResponse;
+import com.zjb.ruleplatform.entity.dto.ListRuleEngineVariableRequest;
 import com.zjb.ruleplatform.manager.*;
 import com.zjb.ruleplatform.service.ElementService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,15 +37,20 @@ public class ElementServiceImpl implements ElementService {
 
 
     @Override
-    public PageResult<ElementResponse> selectElementPageList(PageRequest<String> pageRequest) {
-        //请求参数
-        final String query = pageRequest.getQuery();
-        //获取到分页数据
-        final PageRequest.PageBase page = pageRequest.getPage();
+    public PageResult<ElementResponse> selectElementPageList(PageRequest<ListRuleEngineVariableRequest> pageRequest) {
         QueryWrapper<RuleEngineElement> queryWrapper = new QueryWrapper<>();
-        if (Validator.isNotEmpty(query)) {
-            queryWrapper.lambda().like(RuleEngineElement::getCodeName, query);
+        //请求参数
+        final ListRuleEngineVariableRequest query = pageRequest.getQuery();
+        if (query != null) {
+            final String name = query.getName();
+            if (Validator.isNotEmpty(name)) {
+                queryWrapper.lambda().like(RuleEngineElement::getCodeName, name);
+            }
+            if (CollUtil.isNotEmpty(query.getValueDataType())) {
+                queryWrapper.lambda().in(RuleEngineElement::getValueDataType, query.getValueDataType());
+            }
         }
+        final PageRequest<ListRuleEngineVariableRequest>.PageBase page = pageRequest.getPage();
         queryWrapper.lambda().orderByDesc(RuleEngineElement::getId);
         IPage<RuleEngineElement> pageData = ruleEngineElementManager.page(new Page<>(page.getPageIndex(), page.getPageSize()), queryWrapper);
         List<RuleEngineElement> ruleEngineElements = pageData.getRecords();
