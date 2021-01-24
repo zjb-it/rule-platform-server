@@ -23,13 +23,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleengine.core.enums.Symbol;
+import com.zjb.ruleengine.core.enums.ValueTypeEnum;
 import com.zjb.ruleplatform.entity.RuleEngineCondition;
 import com.zjb.ruleplatform.entity.RuleEngineElement;
 import com.zjb.ruleplatform.entity.RuleEngineVariable;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.*;
-import com.zjb.ruleplatform.entity.enums.ValueType;
 import com.zjb.ruleplatform.manager.RuleEngineConditionManager;
 import com.zjb.ruleplatform.manager.RuleEngineElementManager;
 import com.zjb.ruleplatform.manager.RuleEngineVariableManager;
@@ -81,10 +81,11 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         if (Validator.isNotEmpty(name)) {
             queryWrapper.lambda().like(RuleEngineCondition::getName, name);
         }
-
+        queryWrapper.lambda().orderByDesc(RuleEngineCondition::getId);
         //查询条件
         IPage<RuleEngineCondition> iPage = ruleEngineConditionManager.page(new Page<>(page.getPageIndex(), page.getPageSize()), queryWrapper);
         List<RuleEngineCondition> records = iPage.getRecords();
+        pageResult.setTotal(iPage.getTotal());
         if (CollUtil.isEmpty(records)) {
             pageResult.setData(Collections.emptyList());
             return pageResult;
@@ -101,13 +102,13 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
             String left = "";
             //判断左边值类型
             final String leftValueType = e.getLeftValueType();
-            if (Objects.equals(leftValueType, ValueType.CONSTANT.name())) {
+            if (Objects.equals(leftValueType, ValueTypeEnum.CONSTANT.name())) {
                 //固定值
                 left = e.getLeftValue();
-            } else if (Objects.equals(leftValueType, ValueType.VARIABLE.name())) {
+            } else if (Objects.equals(leftValueType, ValueTypeEnum.VARIABLE.name())) {
                 //变量
                 left = variableMap.get(Long.parseLong(e.getLeftValue())).getName();
-            } else if (Objects.equals(leftValueType, ValueType.ELEMENT.name())) {
+            } else if (Objects.equals(leftValueType, ValueTypeEnum.ELEMENT.name())) {
                 //元素
                 left = elementMap.get(Long.parseLong(e.getLeftValue())).getName();
 
@@ -115,13 +116,13 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
             //判断右边值类型
             String right = "";
             final String rightValueType = e.getRightValueType();
-            if (Objects.equals(rightValueType, ValueType.CONSTANT.name())) {
+            if (Objects.equals(rightValueType, ValueTypeEnum.CONSTANT.name())) {
                 //固定值
                 right = e.getRightValue();
-            } else if (Objects.equals(rightValueType, ValueType.VARIABLE.name())) {
+            } else if (Objects.equals(rightValueType, ValueTypeEnum.VARIABLE.name())) {
                 //变量
                 left = variableMap.get(Long.parseLong(e.getRightValue())).getName();
-            } else if (Objects.equals(rightValueType, ValueType.ELEMENT.name())) {
+            } else if (Objects.equals(rightValueType, ValueTypeEnum.ELEMENT.name())) {
                 //元素
                 left = elementMap.get(Long.parseLong(e.getRightValue())).getName();
             }
@@ -145,15 +146,15 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         Set<Long> elementIdSet = new HashSet<>(11);
         for (RuleEngineCondition record : records) {
             final String leftValueType = record.getLeftValueType();
-            if (ValueType.VARIABLE.name().equals(leftValueType)) {
+            if (ValueTypeEnum.VARIABLE.name().equals(leftValueType)) {
                 variableIdSet.add(Long.parseLong(record.getLeftValue()));
-            } else if (ValueType.ELEMENT.name().equals(leftValueType)) {
+            } else if (ValueTypeEnum.ELEMENT.name().equals(leftValueType)) {
                 elementIdSet.add(Long.parseLong(record.getLeftValue()));
             }
             final String rightValueType = record.getRightValueType();
-            if (ValueType.VARIABLE.name().equals(rightValueType)) {
+            if (ValueTypeEnum.VARIABLE.name().equals(rightValueType)) {
                 variableIdSet.add(Long.parseLong(record.getRightValue()));
-            } else if (ValueType.ELEMENT.name().equals(rightValueType)) {
+            } else if (ValueTypeEnum.ELEMENT.name().equals(rightValueType)) {
                 elementIdSet.add(Long.parseLong(record.getRightValue()));
             }
         }
@@ -243,28 +244,28 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         }
         String type = left.getValueDataType();
         condition.setLeftValueType(type);
-        condition.setLeftDataType(left.getValueType());
+        condition.setLeftValueDataType(left.getValueType());
         condition.setLeftValue(left.getValue());
         //如果是固定值
-        if (Objects.equals(type, ValueType.CONSTANT.name())) {
+        if (Objects.equals(type, ValueTypeEnum.CONSTANT.name())) {
             if (Validator.isEmpty(left.getValueType())) {
                 throw new ValidationException("左值类型不能为空");
             }
             addConstantCheck(left.getValueType(), left.getValue());
-        } else if (Objects.equals(type, ValueType.VARIABLE.name())) {
+        } else if (Objects.equals(type, ValueTypeEnum.VARIABLE.name())) {
             //变量
             RuleEngineVariable byId = getVariableById(Long.valueOf(left.getValue()));
             if (byId == null) {
                 throw new ValidationException("左值变量不存在");
             }
-            condition.setLeftDataType(byId.getValueDataType());
-        } else if (Objects.equals(type, ValueType.ELEMENT.name())) {
+            condition.setLeftValueDataType(byId.getValueDataType());
+        } else if (Objects.equals(type, ValueTypeEnum.ELEMENT.name())) {
             //元素
             RuleEngineElement byId = getElementById(Long.valueOf(left.getValue()));
             if (byId == null) {
                 throw new ValidationException("左值元素不存在");
             }
-            condition.setLeftDataType(byId.getValueDataType());
+            condition.setLeftValueDataType(byId.getValueDataType());
         } /*else if (Objects.equals(type, VariableTypeEnum.RESULT.getStatus())) {
             //默认ValueType为COLLECTION
             condition.setLeftDataType(leftType = DataType.COLLECTION.name());
@@ -379,12 +380,12 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         //配置
         ConfigBean configBean = new ConfigBean();
         //左
-        final ConfigBean.LeftBean leftBean = new ConfigBean.LeftBean(condition.getLeftDataType(),condition.getLeftValue(),"",condition.getLeftValueType());
+        final ConfigBean.LeftBean leftBean = new ConfigBean.LeftBean(condition.getLeftValueDataType(),condition.getLeftValue(),"",condition.getLeftValueType());
         getLeftBean(leftBean, ruleAllConditionInfo);
         configBean.setLeftVariable(leftBean);
         //符号
         configBean.setSymbol(condition.getSymbol());
-        final ConfigBean.LeftBean rightBean = new ConfigBean.LeftBean(condition.getRightDataType(), condition.getRightValue(), "", condition.getRightValueType());
+        final ConfigBean.LeftBean rightBean = new ConfigBean.LeftBean(condition.getRightValueDataType(), condition.getRightValue(), "", condition.getRightValueType());
         getLeftBean(rightBean, ruleAllConditionInfo);
         configBean.setRightVariable(rightBean);
         conditionResponse.setConfig(configBean);
@@ -394,10 +395,10 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
     private void getLeftBean(ConfigBean.LeftBean leftBean, RuleAllConditionInfo ruleAllConditionInfo) {
         String type = leftBean.getValueDataType();
         final String value = leftBean.getValue();
-        if (Objects.equals(type, ValueType.CONSTANT.name())) {
+        if (Objects.equals(type, ValueTypeEnum.CONSTANT.name())) {
             //固定值
             leftBean.setValueName(value);
-        } else if (Objects.equals(type, ValueType.VARIABLE.name())) {
+        } else if (Objects.equals(type, ValueTypeEnum.VARIABLE.name())) {
             RuleEngineVariable variableManagerById;
             if (ruleAllConditionInfo != null) {
                 variableManagerById = ruleAllConditionInfo.getVariableMap().get(Long.parseLong(value));
@@ -405,7 +406,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
                 variableManagerById = ruleEngineVariableManager.getById(value);
             }
             leftBean.setValueName(variableManagerById.getName());
-        } else if (Objects.equals(type, ValueType.ELEMENT.name())) {
+        } else if (Objects.equals(type, ValueTypeEnum.ELEMENT.name())) {
             RuleEngineElement element;
             if (ruleAllConditionInfo != null) {
                 element = ruleAllConditionInfo.getElementMap().get(Long.parseLong(value));

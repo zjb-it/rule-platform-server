@@ -32,7 +32,6 @@ public class RuleEngineCondition implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    private String code;
 
     private String name;
 
@@ -46,7 +45,7 @@ public class RuleEngineCondition implements Serializable {
     /**
      * NUMBER ,STRING ,BOOLEAN ,COLLECTION，
      */
-    private String leftDataType;
+    private String leftValueDataType;
 
     private String rightValueType;
 
@@ -55,7 +54,7 @@ public class RuleEngineCondition implements Serializable {
     /**
      * NUMBER ,STRING ,BOOLEAN ,COLLECTION，
      */
-    private String rightDataType;
+    private String rightValueDataType;
 
     private String symbol;
 
