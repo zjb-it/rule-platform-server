@@ -62,6 +62,15 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
                 data.add(functionVo);
             }
         });
+        FunctionDetailVo testFun = new FunctionDetailVo();
+        testFun.setDescription("测试funtion");
+        testFun.setName("TestFuntion");
+        List<FunctionDetailVo.VariablesBean> testFunPar = Lists.newArrayList();
+        testFunPar.add(new FunctionDetailVo.VariablesBean("boolean","布尔",DataTypeEnum.BOOLEAN.name()));
+        testFunPar.add(new FunctionDetailVo.VariablesBean("collection","集合",DataTypeEnum.COLLECTION.name()));
+        testFunPar.add(new FunctionDetailVo.VariablesBean("json","json",DataTypeEnum.JSONOBJECT.name()));
+        testFun.setVariables(testFunPar);
+        data.add(testFun);
         PageResult<FunctionDetailVo> result = new PageResult<>();
         result.setData(data);
         return result;
