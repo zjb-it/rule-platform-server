@@ -36,5 +36,5 @@ public class SymbolResponse {
     /**
      * 数据类型
      */
-    private List<String> valueTypes;
+    private List<String> valueDataTypes;
 }

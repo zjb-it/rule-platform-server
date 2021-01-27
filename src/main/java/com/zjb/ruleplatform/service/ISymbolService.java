@@ -9,10 +9,10 @@ public interface ISymbolService {
     /**
      * 根据类型选择symbol
      *
-     * @param valueType 左值类型
+     * @param valueDataType 左值类型
      * @return list
      */
-    List<SymbolResponse> get(String valueType);
+    List<SymbolResponse> get(String valueDataType);
 
     /**
      * 决策表支持x in COLLECTION

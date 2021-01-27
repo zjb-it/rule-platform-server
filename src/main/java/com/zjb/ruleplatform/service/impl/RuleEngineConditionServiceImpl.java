@@ -206,7 +206,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         //左边值
         String leftType = generateConditionValueLeft(condition, add.getConfig().getLeftVariable());
         //右边值
-        String rightType = generateConditionValueLeft(condition, add.getConfig().getRightVariable());
+        String rightType = generateConditionValueRight(condition, add.getConfig().getRightVariable());
         //运算符号
         String symbol = add.getConfig().getSymbol();
 
@@ -222,6 +222,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         condition.setSymbol(symbol);
         condition.setSymbolName(symbolType.getName());
         condition.setSymbolType(symbolType.getType().name());
+
         //根据左值类型查询所支持的符号以及类型
         List<SymbolResponse> symbolResponses = iSymbolService.get(leftType);
         //检查是否匹配
@@ -243,8 +244,8 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
             throw new ValidationException("左值不能为空");
         }
         String type = left.getValueDataType();
-        condition.setLeftValueType(type);
-        condition.setLeftValueDataType(left.getValueType());
+        condition.setLeftValueType(left.getValueType());
+        condition.setLeftValueDataType(type);
         condition.setLeftValue(left.getValue());
         //如果是固定值
         if (Objects.equals(type, ValueTypeEnum.CONSTANT.name())) {
@@ -270,10 +271,44 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
             //默认ValueType为COLLECTION
             condition.setLeftDataType(leftType = DataType.COLLECTION.name());
         }*/
-        return left.getValueType();
+        return left.getValueDataType();
     }
 
+    private String generateConditionValueRight(RuleEngineCondition condition, ConfigBean.LeftBean left) {
 
+        if (Validator.isEmpty(left.getValue())) {
+            throw new ValidationException("左值不能为空");
+        }
+        String type = left.getValueDataType();
+        condition.setRightValueType(left.getValueType());
+        condition.setRightValueDataType(type);
+        condition.setRightValue(left.getValue());
+        //如果是固定值
+        if (Objects.equals(type, ValueTypeEnum.CONSTANT.name())) {
+            if (Validator.isEmpty(left.getValueType())) {
+                throw new ValidationException("左值类型不能为空");
+            }
+            addConstantCheck(left.getValueType(), left.getValue());
+        } else if (Objects.equals(type, ValueTypeEnum.VARIABLE.name())) {
+            //变量
+            RuleEngineVariable byId = getVariableById(Long.valueOf(left.getValue()));
+            if (byId == null) {
+                throw new ValidationException("左值变量不存在");
+            }
+            condition.setRightValueDataType(byId.getValueDataType());
+        } else if (Objects.equals(type, ValueTypeEnum.ELEMENT.name())) {
+            //元素
+            RuleEngineElement byId = getElementById(Long.valueOf(left.getValue()));
+            if (byId == null) {
+                throw new ValidationException("左值元素不存在");
+            }
+            condition.setRightValueDataType(byId.getValueDataType());
+        } /*else if (Objects.equals(type, VariableTypeEnum.RESULT.getStatus())) {
+            //默认ValueType为COLLECTION
+            condition.setLeftDataType(leftType = DataType.COLLECTION.name());
+        }*/
+        return left.getValueDataType();
+    }
     /**
      * 条件更新
      *
@@ -341,7 +376,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
             String responseSymbol = symbolResponse.getSymbol();
             if (responseSymbol.equals(symbol)) {
                 //如果符号匹配
-                List<String> valueTypes = symbolResponse.getValueTypes();
+                List<String> valueTypes = symbolResponse.getValueDataTypes();
                 if (valueTypes.contains(valueType)) {
                     return true;
                 }

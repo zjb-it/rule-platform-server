@@ -31,5 +31,5 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class SymbolRequest {
     @NotNull
-    private String valueType;
+    private String valueDataType;
 }

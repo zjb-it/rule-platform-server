@@ -13,9 +13,7 @@
 package com.zjb.ruleplatform.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.EnumUtil;
 import com.google.common.collect.Lists;
-import com.oracle.jrockit.jfr.DataType;
 import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleengine.core.enums.Symbol;
 import com.zjb.ruleplatform.entity.dto.SymbolResponse;
@@ -23,11 +21,9 @@ import com.zjb.ruleplatform.service.ISymbolService;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ValidationException;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 〈一句话功能简述〉<br>
@@ -45,50 +41,48 @@ public class ISymbolServiceImpl implements ISymbolService {
      * @return list
      */
     @Override
-    public List<SymbolResponse> get(String valueType) {
+    public List<SymbolResponse> get(String valueDataType) {
 
         List<SymbolResponse> arrayList = new ArrayList<>(10);
         //如果是集合类型
-        if (DataTypeEnum.COLLECTION.name().equals(valueType)) {
+        if (DataTypeEnum.COLLECTION.name().equals(valueDataType)) {
             List<Symbol> symbols = Symbol.listSymbolsByType(DataTypeEnum.COLLECTION);
-            //Map<String, DataType> enumMap = EnumUtil.getEnumMap(DataTypeEnum.class);
-            List<String> collection = new ArrayList<>();
             for (Symbol symbol : symbols) {
                 SymbolResponse sr = new SymbolResponse();
                 sr.setSymbol(symbol.getSymbol());
-                //如果左侧是COLLECTION，运算符为=，则右侧只能为COLLECTION
-                if (symbol.getType().equals(DataTypeEnum.COLLECTION) && symbol.getSymbol().equals(Symbol.set_eq.getSymbol())) {
-                    sr.setValueTypes(Collections.singletonList(DataTypeEnum.COLLECTION.name()));
-                } else {
-                    sr.setValueTypes(collection);
+                //如果左侧是COLLECTION，运算符为=,not in ,in ，则右侧只能为COLLECTION
+                if (symbol.getType().equals(DataTypeEnum.COLLECTION) && (symbol.getSymbol().equals(Symbol.set_eq.getSymbol())|| symbol.getSymbol().equals(Symbol.collection_not_in.getSymbol()) || symbol.getSymbol().equals(Symbol.collection_in.getSymbol()))) {
+                    sr.setValueDataTypes(Collections.singletonList(DataTypeEnum.COLLECTION.name()));
+                } else{
+                    sr.setValueDataTypes(Lists.newArrayList(DataTypeEnum.BOOLEAN.name(),DataTypeEnum.NUMBER.name(),DataTypeEnum.STRING.name(),DataTypeEnum.COLLECTION.name()));
                 }
                 arrayList.add(sr);
             }
-        } else if (DataTypeEnum.NUMBER.name().equals(valueType)) {
+        } else if (DataTypeEnum.NUMBER.name().equals(valueDataType)) {
             List<Symbol> symbols = Symbol.listSymbolsByType(DataTypeEnum.NUMBER);
             for (Symbol symbol : symbols) {
                 SymbolResponse sr = new SymbolResponse();
                 sr.setSymbol(symbol.getSymbol());
                 if ("in".equals(symbol.getSymbol()) || "notIn".equals(symbol.getSymbol())) {
-                    sr.setValueTypes(Lists.newArrayList(DataTypeEnum.COLLECTION.name()));
+                    sr.setValueDataTypes(Lists.newArrayList(DataTypeEnum.COLLECTION.name()));
                 } else {
-                    sr.setValueTypes(Lists.newArrayList(DataTypeEnum.NUMBER.name()));
+                    sr.setValueDataTypes(Lists.newArrayList(DataTypeEnum.NUMBER.name()));
                 }
                 arrayList.add(sr);
             }
-        } else if (DataTypeEnum.STRING.name().equals(valueType)) {
+        } else if (DataTypeEnum.STRING.name().equals(valueDataType)) {
             List<Symbol> symbols = Symbol.listSymbolsByType(DataTypeEnum.STRING);
             for (Symbol symbol : symbols) {
                 SymbolResponse sr = new SymbolResponse();
                 sr.setSymbol(symbol.getSymbol());
                 if ("in".equals(symbol.getSymbol()) || "notIn".equals(symbol.getSymbol())) {
-                    sr.setValueTypes(Lists.newArrayList(DataTypeEnum.COLLECTION.name()));
+                    sr.setValueDataTypes(Lists.newArrayList(DataTypeEnum.COLLECTION.name()));
                 } else {
-                    sr.setValueTypes(Lists.newArrayList(DataTypeEnum.STRING.name()));
+                    sr.setValueDataTypes(Lists.newArrayList(DataTypeEnum.STRING.name()));
                 }
                 arrayList.add(sr);
             }
-        } else if (DataTypeEnum.BOOLEAN.name().equals(valueType)) {
+        } else if (DataTypeEnum.BOOLEAN.name().equals(valueDataType)) {
             List<Symbol> symbols = Symbol.listSymbolsByType(DataTypeEnum.BOOLEAN);
             if (CollUtil.isEmpty(symbols)) {
                 return arrayList;
@@ -97,9 +91,9 @@ public class ISymbolServiceImpl implements ISymbolService {
                 SymbolResponse sr = new SymbolResponse();
                 sr.setSymbol(symbol.getSymbol());
                 if ("in".equals(symbol.getSymbol()) || "notIn".equals(symbol.getSymbol())) {
-                    sr.setValueTypes(Lists.newArrayList(DataTypeEnum.COLLECTION.name()));
+                    sr.setValueDataTypes(Lists.newArrayList(DataTypeEnum.COLLECTION.name()));
                 } else {
-                    sr.setValueTypes(Lists.newArrayList(DataTypeEnum.BOOLEAN.name()));
+                    sr.setValueDataTypes(Lists.newArrayList(DataTypeEnum.BOOLEAN.name()));
                 }
                 arrayList.add(sr);
             }

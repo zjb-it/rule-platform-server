@@ -21,8 +21,9 @@ public class ElementResponse  {
     @ApiModelProperty(value = "元素描述", name = "description")
     private String description;
     private String valueDataType;
+    private String valueDataTypeDesc;
 
-    public String getValueDataType() {
+    public String getValueDataTypeDesc() {
         return DataTypeUtils.getName(valueDataType);
     }
 

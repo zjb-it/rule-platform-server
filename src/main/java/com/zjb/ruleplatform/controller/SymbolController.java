@@ -55,7 +55,7 @@ public class SymbolController {
     @PostMapping("/get")
     public PlainResult<List<SymbolResponse>> get(@ApiParam @RequestBody @Valid SymbolRequest symbolRequest) {
         val plainResult = new PlainResult<List<SymbolResponse>>();
-        plainResult.setData(symbolService.get(symbolRequest.getValueType()));
+        plainResult.setData(symbolService.get(symbolRequest.getValueDataType()));
         return plainResult;
     }
 }

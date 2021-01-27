@@ -38,10 +38,11 @@ public class ListRuleEngineVariableResponse {
     private Long id;
     private String name;
     private String valueDataType;
+    private String valueDataTypeDesc;
     private String functionName;
     private String description;
 
-    public String getValueDataType() {
+    public String getValueDataTypeDesc() {
         return DataTypeUtils.getName(valueDataType);
     }
 
