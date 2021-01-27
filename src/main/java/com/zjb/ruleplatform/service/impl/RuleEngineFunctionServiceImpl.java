@@ -3,8 +3,10 @@ package com.zjb.ruleplatform.service.impl;
 import java.util.*;
 
 
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -120,11 +122,21 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
             queryWrapper.like(RuleEngineFunction::getName, query);
         }
         final Page<RuleEngineFunction> page = functionManager.page(new Page<>(pageResult.getPage().getPageIndex(), pageResult.getPage().getPageSize()), queryWrapper);
+        if (CollUtil.isEmpty(page.getRecords())) {
+            return new PageResult<>();
+        }
+        final Set<Long> funIds = page.getRecords().stream().map(RuleEngineFunction::getId).collect(Collectors.toSet());
+        final Map<Long, List<RuleEngineFunctionParam>> params = functionParamManager.lambdaQuery().in(RuleEngineFunctionParam::getFunctionId, funIds)
+                .list().stream().collect(Collectors.groupingBy(RuleEngineFunctionParam::getFunctionId));
+
         PageResult<AddHttpFunction> result = new PageResult<>();
         result.setTotal(page.getTotal());
         final List<AddHttpFunction> collect = page.getRecords().stream().map(record -> {
             AddHttpFunction function = new AddHttpFunction();
-
+            BeanUtils.copyProperties(record, function);
+            function.setParams(params.get(record.getId()).stream()
+                    .map(param -> new AddHttpFunction.Param(param.getFunctionParamCode(), param.getFunctionParamName(), param.getValueDataType()))
+                    .collect(Collectors.toList()));
             return function;
         }).collect(Collectors.toList());
         result.setData(collect);

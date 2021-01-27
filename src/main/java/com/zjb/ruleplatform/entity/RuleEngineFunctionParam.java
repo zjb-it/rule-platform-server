@@ -65,7 +65,7 @@ public class RuleEngineFunctionParam implements Serializable {
     /**
      * ，
      */
-    @TableLogic
+    //@TableLogic
     private Boolean deleted;
 
 

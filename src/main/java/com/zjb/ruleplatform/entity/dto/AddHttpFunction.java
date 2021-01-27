@@ -1,6 +1,8 @@
 package com.zjb.ruleplatform.entity.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ public class AddHttpFunction {
     private List<Param> params;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Param {
         private String code;
         private String name;
