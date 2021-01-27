@@ -1,24 +1,31 @@
 package com.zjb.ruleplatform.service.impl;
 
+import java.util.*;
 
-import com.google.common.collect.ConcurrentHashMultiset;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.zjb.ruleengine.core.config.FunctionHolder;
 import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleengine.core.function.Function;
+import com.zjb.ruleplatform.entity.RuleEngineFunction;
+import com.zjb.ruleplatform.entity.RuleEngineFunctionParam;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
+import com.zjb.ruleplatform.entity.dto.AddHttpFunction;
 import com.zjb.ruleplatform.entity.vo.FunctionDetailVo;
+import com.zjb.ruleplatform.manager.RuleEngineFunctionManager;
+import com.zjb.ruleplatform.manager.RuleEngineFunctionParamManager;
 import com.zjb.ruleplatform.service.RuleEngineFunctionService;
-import com.zjb.ruleplatform.util.DataTypeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +36,10 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
 
     @Autowired
     private FunctionHolder functionHolder;
+    @Autowired
+    private RuleEngineFunctionManager functionManager;
+    @Autowired
+    private RuleEngineFunctionParamManager functionParamManager;
 
     //funciton的别名，可以自己起
     private static final Map<String, String> functionDesc = Maps.newHashMap();
@@ -45,7 +56,7 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
     }
 
     @Override
-    public PageResult<FunctionDetailVo> functionLookUp(String name,String valueDataType) {
+    public PageResult<FunctionDetailVo> functionLookUp(String name, String valueDataType) {
         final DataTypeEnum dataTypeByName = DataTypeEnum.getDataTypeByName(valueDataType);
         final Map<String, Function> functions = functionHolder.getFunctions();
         final ArrayList<FunctionDetailVo> data = Lists.newArrayList();
@@ -66,14 +77,66 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
         testFun.setDescription("测试funtion");
         testFun.setName("TestFuntion");
         List<FunctionDetailVo.VariablesBean> testFunPar = Lists.newArrayList();
-        testFunPar.add(new FunctionDetailVo.VariablesBean("boolean","布尔",DataTypeEnum.BOOLEAN.name()));
-        testFunPar.add(new FunctionDetailVo.VariablesBean("collection","集合",DataTypeEnum.COLLECTION.name()));
-        testFunPar.add(new FunctionDetailVo.VariablesBean("json","json",DataTypeEnum.JSONOBJECT.name()));
+        testFunPar.add(new FunctionDetailVo.VariablesBean("boolean", "布尔", DataTypeEnum.BOOLEAN.name()));
+        testFunPar.add(new FunctionDetailVo.VariablesBean("collection", "集合", DataTypeEnum.COLLECTION.name()));
+        testFunPar.add(new FunctionDetailVo.VariablesBean("json", "json", DataTypeEnum.JSONOBJECT.name()));
         testFun.setVariables(testFunPar);
         data.add(testFun);
         PageResult<FunctionDetailVo> result = new PageResult<>();
         result.setData(data);
         return result;
+    }
 
+    @Override
+    public Boolean registerHttpFunction(AddHttpFunction function) {
+        final RuleEngineFunction ruleEngineFunction = new RuleEngineFunction();
+        BeanUtils.copyProperties(function, ruleEngineFunction);
+        functionManager.save(ruleEngineFunction);
+        final List<RuleEngineFunctionParam> collect = function.getParams().stream().map(param -> {
+            final RuleEngineFunctionParam functionParam = new RuleEngineFunctionParam();
+            functionParam.setFunctionId(ruleEngineFunction.getId());
+            functionParam.setFunctionParamCode(param.getCode());
+            functionParam.setFunctionParamName(param.getName());
+            functionParam.setValueDataType(param.getValueDataType());
+            return functionParam;
+        }).collect(Collectors.toList());
+
+        functionParamManager.saveBatch(collect);
+        return true;
+    }
+
+    @Override
+    public Boolean updateHttpFunction(AddHttpFunction function) {
+        Objects.requireNonNull(function.getId());
+        deleteHttpFunction(function.getId());
+        return this.registerHttpFunction(function);
+    }
+
+    @Override
+    public PageResult<AddHttpFunction> pageHttpFunction(PageRequest<String> pageResult) {
+        LambdaQueryWrapper<RuleEngineFunction> queryWrapper = new LambdaQueryWrapper<>();
+        final String query = pageResult.getQuery();
+        if (StringUtils.isNotBlank(query)) {
+            queryWrapper.like(RuleEngineFunction::getName, query);
+        }
+        final Page<RuleEngineFunction> page = functionManager.page(new Page<>(pageResult.getPage().getPageIndex(), pageResult.getPage().getPageSize()), queryWrapper);
+        PageResult<AddHttpFunction> result = new PageResult<>();
+        result.setTotal(page.getTotal());
+        final List<AddHttpFunction> collect = page.getRecords().stream().map(record -> {
+            AddHttpFunction function = new AddHttpFunction();
+
+            return function;
+        }).collect(Collectors.toList());
+        result.setData(collect);
+
+        return result;
+    }
+
+    @Override
+    public Boolean deleteHttpFunction(Long id) {
+        final LambdaQueryWrapper<RuleEngineFunctionParam> eq = new QueryWrapper<RuleEngineFunctionParam>()
+                .lambda()
+                .eq(RuleEngineFunctionParam::getFunctionId, id);
+        return functionManager.removeById(id) && functionParamManager.remove(eq);
     }
 }
