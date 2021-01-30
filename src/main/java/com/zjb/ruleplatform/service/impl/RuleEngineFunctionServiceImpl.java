@@ -93,6 +93,7 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
     public Boolean registerHttpFunction(AddHttpFunction function) {
         final RuleEngineFunction ruleEngineFunction = new RuleEngineFunction();
         BeanUtils.copyProperties(function, ruleEngineFunction);
+        ruleEngineFunction.setCodeName(function.getCode()+function.getName());
         functionManager.save(ruleEngineFunction);
         final List<RuleEngineFunctionParam> collect = function.getParams().stream().map(param -> {
             final RuleEngineFunctionParam functionParam = new RuleEngineFunctionParam();
@@ -119,7 +120,7 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
         LambdaQueryWrapper<RuleEngineFunction> queryWrapper = new LambdaQueryWrapper<>();
         final String query = pageResult.getQuery();
         if (StringUtils.isNotBlank(query)) {
-            queryWrapper.like(RuleEngineFunction::getName, query);
+            queryWrapper.like(RuleEngineFunction::getCodeName, query);
         }
         final Page<RuleEngineFunction> page = functionManager.page(new Page<>(pageResult.getPage().getPageIndex(), pageResult.getPage().getPageSize()), queryWrapper);
         if (CollUtil.isEmpty(page.getRecords())) {

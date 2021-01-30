@@ -47,7 +47,7 @@ public class FunctionController {
         return new PlainResult<>(result);
     }
 
-    @PostMapping("/update")
+        @PostMapping("/update")
     public PlainResult<Boolean> update(@RequestBody AddHttpFunction addHttpFunction) {
         final Boolean result = functionService.updateHttpFunction(addHttpFunction);
         return new PlainResult<>(result);

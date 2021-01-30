@@ -52,6 +52,7 @@ public class RuleEngineFunctionParam implements Serializable {
      */
     private String valueDataType;
 
+
     /**
      * 创建时间，
      */

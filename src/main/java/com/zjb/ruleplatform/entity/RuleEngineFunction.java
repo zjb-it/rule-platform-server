@@ -41,6 +41,9 @@ public class RuleEngineFunction implements Serializable {
      * ，
      */
     private String code;
+    private String url;
+
+    private String codeName;
 
     private String description;
 

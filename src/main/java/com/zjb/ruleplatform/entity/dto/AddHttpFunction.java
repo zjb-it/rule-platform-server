@@ -15,7 +15,9 @@ public class AddHttpFunction {
     private Long id;
     private String code;
     private String name;
+    private String url;
     private String description;
+    private String valueDataType;
     private List<Param> params;
 
     @Data
