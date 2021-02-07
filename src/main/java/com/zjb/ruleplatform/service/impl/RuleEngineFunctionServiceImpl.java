@@ -93,8 +93,13 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
     public Boolean registerHttpFunction(AddHttpFunction function) {
         final RuleEngineFunction ruleEngineFunction = new RuleEngineFunction();
         BeanUtils.copyProperties(function, ruleEngineFunction);
-        ruleEngineFunction.setCodeName(function.getCode()+function.getName());
+        ruleEngineFunction.setCodeName(function.getCode() + function.getName());
         functionManager.save(ruleEngineFunction);
+        saveParams(function, ruleEngineFunction);
+        return true;
+    }
+
+    private void saveParams(AddHttpFunction function, RuleEngineFunction ruleEngineFunction) {
         final List<RuleEngineFunctionParam> collect = function.getParams().stream().map(param -> {
             final RuleEngineFunctionParam functionParam = new RuleEngineFunctionParam();
             functionParam.setFunctionId(ruleEngineFunction.getId());
@@ -105,14 +110,17 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
         }).collect(Collectors.toList());
 
         functionParamManager.saveBatch(collect);
-        return true;
     }
 
     @Override
     public Boolean updateHttpFunction(AddHttpFunction function) {
         Objects.requireNonNull(function.getId());
-        deleteHttpFunction(function.getId());
-        return this.registerHttpFunction(function);
+        final RuleEngineFunction ruleEngineFunction = new RuleEngineFunction();
+        BeanUtils.copyProperties(function, ruleEngineFunction);
+        functionManager.updateById(ruleEngineFunction);
+        deleteParam(function.getId());
+        this.saveParams(function, ruleEngineFunction);
+        return true;
     }
 
     @Override
@@ -147,9 +155,13 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
 
     @Override
     public Boolean deleteHttpFunction(Long id) {
+        return functionManager.removeById(id) && deleteParam(id);
+    }
+
+    private Boolean deleteParam(Long id) {
         final LambdaQueryWrapper<RuleEngineFunctionParam> eq = new QueryWrapper<RuleEngineFunctionParam>()
                 .lambda()
                 .eq(RuleEngineFunctionParam::getFunctionId, id);
-        return functionManager.removeById(id) && functionParamManager.remove(eq);
+        return  functionParamManager.remove(eq);
     }
 }

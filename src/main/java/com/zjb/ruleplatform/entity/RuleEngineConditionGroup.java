@@ -29,6 +29,7 @@ import lombok.EqualsAndHashCode;
       private Long id;
 
     private Long conditionId;
+    private Long ruleId;
 
     private Integer conditionOrder;
 

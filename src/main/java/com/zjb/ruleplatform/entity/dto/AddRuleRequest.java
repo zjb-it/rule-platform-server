@@ -15,12 +15,15 @@ public class AddRuleRequest {
     @NotBlank(message = "code不能为空")
     private String code;
 
+    private Long id;
+
     @NotBlank(message = "名称不能为空")
     private String name;
 
     private String description;
 
     private ConfigBean.LeftBean action;
+    private List<ConditionGroup> conditionGroups;
 
     @Data
     public static class ConditionGroup {
