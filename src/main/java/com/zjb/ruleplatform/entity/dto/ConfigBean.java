@@ -1,5 +1,6 @@
 package com.zjb.ruleplatform.entity.dto;
 
+import com.zjb.ruleplatform.entity.vo.LeftBean;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Data
-public  class ConfigBean {
+public class ConfigBean {
     /**
      * left : {"type":0,"value":1,"value_name":"1"}
      * symbol : >
@@ -20,20 +21,5 @@ public  class ConfigBean {
     private String symbol;
     private LeftBean rightVariable;
 
-    @NoArgsConstructor
-    @Data
-    @AllArgsConstructor
-    public static class LeftBean {
-        /**
-         * type : 0
-         * value : 1
-         * value_name : 1
-         */
-
-        private String valueDataType;
-        private String value;
-        private String valueName;
-        private String valueType;
-    }
 
 }

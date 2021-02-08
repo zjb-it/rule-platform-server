@@ -1,13 +1,14 @@
 package com.zjb.ruleplatform.entity.dto;
 
 import com.zjb.ruleengine.core.value.Value;
+import com.zjb.ruleplatform.entity.vo.LeftBean;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
- * @author 赵静波 <wb_zhaojingbo@kuaishou.com>
+ * @author 赵静波 <zhaojingbo>
  * Created on 2021-01-30
  */
 @Data
@@ -22,7 +23,7 @@ public class AddRuleRequest {
 
     private String description;
 
-    private ConfigBean.LeftBean action;
+    private LeftBean action;
     private List<ConditionGroup> conditionGroups;
 
     @Data

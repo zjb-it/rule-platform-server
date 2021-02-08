@@ -63,29 +63,45 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
         final Map<String, Function> functions = functionHolder.getFunctions();
         final ArrayList<FunctionDetailVo> data = Lists.newArrayList();
         functions.forEach((k, v) -> {
-            if (DataTypeEnum.getDataTypeByClass(v.getResultClass()).getClazz().isAssignableFrom(dataTypeByName.getClazz())) {
-                final FunctionDetailVo functionVo = new FunctionDetailVo();
-                functionVo.setDescription(functionDesc.get(k));
-                functionVo.setName(k);
-                final List<Function.Parameter> list = v.getParamters();
-                final List<FunctionDetailVo.VariablesBean> collect = list.stream().map(p ->
-                        new FunctionDetailVo.VariablesBean(p.getName(), functionPropertyDesc.get(k, p.getName()), p.getDataTypeEnum().name())
-                ).collect(Collectors.toList());
-                functionVo.setVariables(collect);
-                data.add(functionVo);
+            if (v.getName().contains(name)) {
+                if (DataTypeEnum.getDataTypeByClass(v.getResultClass()).getClazz().isAssignableFrom(dataTypeByName.getClazz())) {
+                    final FunctionDetailVo functionVo = new FunctionDetailVo();
+                    functionVo.setDescription(functionDesc.get(k));
+                    functionVo.setName(k);
+                    final List<Function.Parameter> list = v.getParamters();
+                    final List<FunctionDetailVo.VariablesBean> collect = list.stream().map(p ->
+                            new FunctionDetailVo.VariablesBean(p.getName(), functionPropertyDesc.get(k, p.getName()), p.getDataTypeEnum().name())
+                    ).collect(Collectors.toList());
+                    functionVo.setVariables(collect);
+                    data.add(functionVo);
+                }
             }
         });
-        FunctionDetailVo testFun = new FunctionDetailVo();
-        testFun.setDescription("测试funtion");
-        testFun.setName("TestFuntion");
-        List<FunctionDetailVo.VariablesBean> testFunPar = Lists.newArrayList();
-        testFunPar.add(new FunctionDetailVo.VariablesBean("boolean", "布尔", DataTypeEnum.BOOLEAN.name()));
-        testFunPar.add(new FunctionDetailVo.VariablesBean("collection", "集合", DataTypeEnum.COLLECTION.name()));
-        testFunPar.add(new FunctionDetailVo.VariablesBean("json", "json", DataTypeEnum.JSONOBJECT.name()));
-        testFun.setVariables(testFunPar);
-        data.add(testFun);
         PageResult<FunctionDetailVo> result = new PageResult<>();
         result.setData(data);
+
+        final List<String> funNames = data.stream().map(FunctionDetailVo::getName).collect(Collectors.toList());
+        final Map<String, String> funNameMap = functionManager.lambdaQuery()
+                .in(RuleEngineFunction::getCode, funNames)
+                .list()
+                .stream()
+                .collect(Collectors.toMap(RuleEngineFunction::getCode, RuleEngineFunction::getName));
+        data.stream().forEach(fun->{
+            if (funNameMap.containsKey(fun.getName())) {
+                fun.setDescription(funNameMap.get(fun.getName()));
+            }
+        });
+
+
+        //FunctionDetailVo testFun = new FunctionDetailVo();
+        //testFun.setDescription("测试funtion");
+        //testFun.setName("TestFuntion");
+        //List<FunctionDetailVo.VariablesBean> testFunPar = Lists.newArrayList();
+        //testFunPar.add(new FunctionDetailVo.VariablesBean("boolean", "布尔", DataTypeEnum.BOOLEAN.name()));
+        //testFunPar.add(new FunctionDetailVo.VariablesBean("collection", "集合", DataTypeEnum.COLLECTION.name()));
+        //testFunPar.add(new FunctionDetailVo.VariablesBean("json", "json", DataTypeEnum.JSONOBJECT.name()));
+        //testFun.setVariables(testFunPar);
+        //data.add(testFun);
         return result;
     }
 
@@ -143,9 +159,11 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
         final List<AddHttpFunction> collect = page.getRecords().stream().map(record -> {
             AddHttpFunction function = new AddHttpFunction();
             BeanUtils.copyProperties(record, function);
-            function.setParams(params.get(record.getId()).stream()
-                    .map(param -> new AddHttpFunction.Param(param.getFunctionParamCode(), param.getFunctionParamName(), param.getValueDataType()))
-                    .collect(Collectors.toList()));
+            if (params.containsKey(record.getId())) {
+                function.setParams(params.get(record.getId()).stream()
+                        .map(param -> new AddHttpFunction.Param(param.getFunctionParamCode(), param.getFunctionParamName(), param.getValueDataType()))
+                        .collect(Collectors.toList()));
+            }
             return function;
         }).collect(Collectors.toList());
         result.setData(collect);
@@ -162,6 +180,8 @@ public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService 
         final LambdaQueryWrapper<RuleEngineFunctionParam> eq = new QueryWrapper<RuleEngineFunctionParam>()
                 .lambda()
                 .eq(RuleEngineFunctionParam::getFunctionId, id);
-        return  functionParamManager.remove(eq);
+        return functionParamManager.remove(eq);
     }
+
+
 }

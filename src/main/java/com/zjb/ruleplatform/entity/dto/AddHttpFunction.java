@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @author 赵静波 <wb_zhaojingbo@kuaishou.com>
+ * @author 赵静波 <zhaojingbo>
  * Created on 2021-01-27
  */
 @Data

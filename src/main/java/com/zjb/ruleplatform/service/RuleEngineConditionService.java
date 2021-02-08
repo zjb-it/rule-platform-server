@@ -4,8 +4,7 @@ package com.zjb.ruleplatform.service;
 import com.zjb.ruleplatform.entity.RuleEngineCondition;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
-import com.zjb.ruleplatform.entity.common.PlainResult;
-import com.zjb.ruleplatform.entity.dto.AddRuleEngineConditionParam;
+import com.zjb.ruleplatform.entity.dto.ConditionParam;
 import com.zjb.ruleplatform.entity.dto.IdAndName;
 import com.zjb.ruleplatform.entity.dto.RuleEngineConditionResponse;
 
@@ -30,7 +29,7 @@ public interface RuleEngineConditionService {
      * @param add 条件参数
      * @return true表示添加成功
      */
-    Boolean add(AddRuleEngineConditionParam add);
+    Boolean add(ConditionParam add);
 
     /**
      * 根据id查询
@@ -38,7 +37,7 @@ public interface RuleEngineConditionService {
      * @param id 条件id
      * @return data
      */
-    AddRuleEngineConditionParam get(Long id);
+    ConditionParam get(Long id);
 
     /**
      * 更新条件
@@ -46,7 +45,7 @@ public interface RuleEngineConditionService {
      * @param update 条件信息
      * @return 返回更新后的数据
      */
-    AddRuleEngineConditionParam update(AddRuleEngineConditionParam update);
+    ConditionParam update(ConditionParam update);
 
 
 
@@ -56,7 +55,7 @@ public interface RuleEngineConditionService {
      * @param condition 条件信息
      * @param add       AddRuleEngineConditionParam
      */
-    void generateConditionValue(RuleEngineCondition condition, AddRuleEngineConditionParam add);
+    void generateConditionValue(RuleEngineCondition condition, ConditionParam add);
 
 
 

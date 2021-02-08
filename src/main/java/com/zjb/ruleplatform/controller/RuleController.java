@@ -17,6 +17,7 @@ import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.common.PlainResult;
 import com.zjb.ruleplatform.entity.dto.*;
+import com.zjb.ruleplatform.entity.vo.RuleDetail;
 import com.zjb.ruleplatform.entity.vo.RuleInfo;
 import com.zjb.ruleplatform.service.RuleEngineConditionService;
 import com.zjb.ruleplatform.service.RuleService;
@@ -63,7 +64,7 @@ public class RuleController {
      */
     @ApiOperation("添加")
     @PostMapping("/add")
-    public PlainResult<Boolean> add(@Valid @RequestBody AddRuleRequest add) {
+    public PlainResult<Long> add(@Valid @RequestBody AddRuleRequest add) {
         return new PlainResult<>(ruleService.addRule(add));
     }
 
@@ -87,19 +88,16 @@ public class RuleController {
     }
 
 
-    ///**
-    // * 根据id查询
-    // *
-    // * @param idRequest 条件id
-    // * @return data
-    // */
-    //@ApiOperation("根据id查询")
-    //@PostMapping("/get")
-    //public PlainResult<AddRuleEngineConditionParam> get(@Valid @RequestBody IdLRequest idRequest) {
-    //    PlainResult<AddRuleEngineConditionParam> plainResult = new PlainResult<>();
-    //    plainResult.setData(ruleEngineConditionService.get(idRequest.getId()));
-    //    return plainResult;
-    //}
+    /**
+     * 根据id查询
+     *
+     * @return data
+     */
+    @ApiOperation("根据id查询")
+    @GetMapping("/get")
+    public PlainResult<RuleDetail> get(Long id) {
+        return new PlainResult<>(ruleService.getRule(id));
+    }
 
 
 

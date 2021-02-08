@@ -28,7 +28,7 @@ import javax.validation.constraints.NotNull;
  */
 @NoArgsConstructor
 @Data
-public class AddRuleEngineConditionParam  {
+public class ConditionParam {
 
     /**
      * name : 合同编号

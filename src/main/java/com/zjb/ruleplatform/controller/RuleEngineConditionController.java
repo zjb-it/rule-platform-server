@@ -12,7 +12,6 @@
  */
 package com.zjb.ruleplatform.controller;
 
-import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleplatform.entity.common.ListResult;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
@@ -65,7 +64,7 @@ public class RuleEngineConditionController {
      */
     @ApiOperation("添加条件")
     @PostMapping("/add")
-    public PlainResult<Boolean> add(@Valid @RequestBody AddRuleEngineConditionParam add) {
+    public PlainResult<Boolean> add(@Valid @RequestBody ConditionParam add) {
         PlainResult<Boolean> plainResult = new PlainResult<>();
         plainResult.setData(ruleEngineConditionService.add(add));
         return plainResult;
@@ -79,8 +78,8 @@ public class RuleEngineConditionController {
      */
     @ApiOperation("根据id查询")
     @PostMapping("/get")
-    public PlainResult<AddRuleEngineConditionParam> get(@Valid @RequestBody IdLRequest idRequest) {
-        PlainResult<AddRuleEngineConditionParam> plainResult = new PlainResult<>();
+    public PlainResult<ConditionParam> get(@Valid @RequestBody IdLRequest idRequest) {
+        PlainResult<ConditionParam> plainResult = new PlainResult<>();
         plainResult.setData(ruleEngineConditionService.get(idRequest.getId()));
         return plainResult;
     }

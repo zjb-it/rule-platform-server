@@ -10,10 +10,12 @@ import com.zjb.ruleplatform.entity.RuleEngineRule;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.AddRuleRequest;
-import com.zjb.ruleplatform.entity.dto.ConfigBean;
+import com.zjb.ruleplatform.entity.vo.LeftBean;
+import com.zjb.ruleplatform.entity.vo.RuleDetail;
 import com.zjb.ruleplatform.entity.vo.RuleInfo;
 import com.zjb.ruleplatform.manager.RuleEngineConditionGroupManager;
 import com.zjb.ruleplatform.manager.RuleEngineRuleManager;
+import com.zjb.ruleplatform.mapper.CustomRuleMapper;
 import com.zjb.ruleplatform.service.RuleService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author 赵静波 <wb_zhaojingbo@kuaishou.com>
+ * @author 赵静波 <zhaojingbo>
  * Created on 2021-01-30
  */
 @Service
@@ -34,13 +36,16 @@ public class RuleServiceImpl implements RuleService {
     private RuleEngineRuleManager ruleManager;
     @Autowired
     private RuleEngineConditionGroupManager conditionGroupManager;
+    @Autowired
+    private CustomRuleMapper ruleMapper;
 
     @Override
-    public boolean addRule(AddRuleRequest addRuleRequest) {
+    public Long addRule(AddRuleRequest addRuleRequest) {
         final RuleEngineRule rule = convertToDbRule(addRuleRequest);
         ruleManager.save(rule);
 
-        return this.saveConditionGroups(addRuleRequest.getConditionGroups(), rule.getId());
+        this.saveConditionGroups(addRuleRequest.getConditionGroups(), rule.getId());
+        return rule.getId();
 
     }
 
@@ -48,15 +53,15 @@ public class RuleServiceImpl implements RuleService {
     private RuleEngineRule convertToDbRule(AddRuleRequest addRuleRequest) {
         final RuleEngineRule rule = new RuleEngineRule();
         BeanUtils.copyProperties(addRuleRequest, rule);
-        final ConfigBean.LeftBean action = addRuleRequest.getAction();
+        final LeftBean action = addRuleRequest.getAction();
         rule.setActionValueType(action.getValueType());
         rule.setActionValue(action.getValue());
         rule.setActionValueDataType(action.getValueDataType());
-        rule.setCodeName(rule.getCode()+rule.getName());
+        rule.setCodeName(rule.getCode() + rule.getName());
         return rule;
     }
 
-    private boolean saveConditionGroups(List<AddRuleRequest.ConditionGroup> conditionGroups,Long ruleId) {
+    private boolean saveConditionGroups(List<AddRuleRequest.ConditionGroup> conditionGroups, Long ruleId) {
         final ArrayList<RuleEngineConditionGroup> dbConditionGroups = Lists.newArrayList();
         final List<AddRuleRequest.ConditionGroup> requestConditionGroups = conditionGroups;
 
@@ -115,5 +120,10 @@ public class RuleServiceImpl implements RuleService {
         result.setTotal(page.getTotal());
         result.setData(data);
         return result;
+    }
+
+    @Override
+    public RuleDetail getRule(Long id) {
+        return ruleMapper.getRule(id);
     }
 }

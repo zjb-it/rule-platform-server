@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zjb.ruleplatform.mapper.CustomRuleMapper">
+    <resultMap id="ruleDetail" type="com.zjb.ruleplatform.entity.vo.RuleDetail">
+        <id property="id" column="ruleId"></id>
+        <result property="code" column="ruleCode"></result>
+        <result property="name" column="ruleName"></result>
+        <result property="description" column="ruleDescription"></result>
+
+        <association property="action" javaType="com.zjb.ruleplatform.entity.vo.LeftBean">
+            <result property="valueType" column="action_value_type"></result>
+            <result property="value" column="action_value"></result>
+            <result property="valueDataType" column="action_value_data_type"></result>
+        </association>
+        <collection property="conditionGroups" ofType="com.zjb.ruleplatform.entity.vo.ConditionGroup">
+            <result property="order" column="condition_group_order"></result>
+            <collection property="conditions" ofType="com.zjb.ruleplatform.entity.dto.ConditionParam">
+                <id property="id" column="conId"></id>
+                <result property="name" column="conName"></result>
+                <result property="description" column="conDescription"></result>
+                <association property="config" javaType="com.zjb.ruleplatform.entity.dto.ConfigBean">
+                    <result property="symbol" column="symbol"></result>
+
+                    <association property="leftVariable" javaType="com.zjb.ruleplatform.entity.vo.LeftBean">
+                        <result property="valueType" column="left_value_type"></result>
+                        <result property="value" column="left_value"></result>
+                        <result property="valueDataType" column="left_value_data_type"></result>
+                    </association>
+                    <association property="rightVariable" javaType="com.zjb.ruleplatform.entity.vo.LeftBean">
+                        <result property="valueType" column="right_value_type"></result>
+                        <result property="value" column="right_value"></result>
+                        <result property="valueDataType" column="right_value_data_type"></result>
+                    </association>
+
+                </association>
+            </collection>
+        </collection>
+
+    </resultMap>
+
+    <select id="getRule" resultMap="ruleDetail">
+
+    SELECT
+	rule.id ruleId,
+	rule.CODE ruleCode,
+	rule.NAME ruleName,
+	rule.description ruleDescription,
+	rule.action_value_type,
+	rule.action_value,
+	rule.action_value_data_type,
+	conGroup.condition_order,
+	conGroup.condition_group_order,
+	con.id conId,
+	con.NAME conName,
+	con.description conDescription,
+	con.left_value_type,
+	con.left_value_data_type,
+	con.left_value,
+	con.right_value_type,
+	con.right_value_data_type,
+	con.right_value,
+	con.symbol,
+	con.symbol_name,
+	con.symbol_type
+FROM
+	( SELECT `id`, `name`, `code`, `description`, `action_value_type`, `action_value`, `action_value_data_type` FROM rule_engine_rule WHERE id = #{id} ) rule
+	LEFT JOIN `rule_engine_condition_group` conGroup ON rule.id = conGroup.rule_id
+	LEFT JOIN rule_engine_condition con ON conGroup.condition_id = con.id
+
+    </select>
+</mapper>

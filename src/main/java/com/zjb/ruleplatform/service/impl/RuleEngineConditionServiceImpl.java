@@ -30,6 +30,7 @@ import com.zjb.ruleplatform.entity.RuleEngineVariable;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.*;
+import com.zjb.ruleplatform.entity.vo.LeftBean;
 import com.zjb.ruleplatform.manager.RuleEngineConditionManager;
 import com.zjb.ruleplatform.manager.RuleEngineElementManager;
 import com.zjb.ruleplatform.manager.RuleEngineVariableManager;
@@ -121,10 +122,10 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
                 right = e.getRightValue();
             } else if (Objects.equals(rightValueType, ValueTypeEnum.VARIABLE.name())) {
                 //变量
-                left = variableMap.get(Long.parseLong(e.getRightValue())).getName();
+                right = variableMap.get(Long.parseLong(e.getRightValue())).getName();
             } else if (Objects.equals(rightValueType, ValueTypeEnum.ELEMENT.name())) {
                 //元素
-                left = elementMap.get(Long.parseLong(e.getRightValue())).getName();
+                right = elementMap.get(Long.parseLong(e.getRightValue())).getName();
             }
             response.setConfig(String.format("%s %s %s", left, e.getSymbol(), right));
             return response;
@@ -185,7 +186,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
      * @return true删除成功
      */
     @Override
-    public Boolean add(AddRuleEngineConditionParam add) {
+    public Boolean add(ConditionParam add) {
         RuleEngineCondition condition = new RuleEngineCondition();
         condition.setName(add.getName());
         condition.setDescription(add.getDescription());
@@ -202,7 +203,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
      * @param add       add
      */
     @Override
-    public void generateConditionValue(RuleEngineCondition condition, AddRuleEngineConditionParam add) {
+    public void generateConditionValue(RuleEngineCondition condition, ConditionParam add) {
         //左边值
         String leftType = generateConditionValueLeft(condition, add.getConfig().getLeftVariable());
         //右边值
@@ -238,7 +239,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
      * @param condition condition
      * @return leftType
      */
-    private String generateConditionValueLeft(RuleEngineCondition condition, ConfigBean.LeftBean left) {
+    private String generateConditionValueLeft(RuleEngineCondition condition, LeftBean left) {
 
         if (Validator.isEmpty(left.getValue())) {
             throw new ValidationException("左值不能为空");
@@ -274,7 +275,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         return left.getValueDataType();
     }
 
-    private String generateConditionValueRight(RuleEngineCondition condition, ConfigBean.LeftBean left) {
+    private String generateConditionValueRight(RuleEngineCondition condition, LeftBean left) {
 
         if (Validator.isEmpty(left.getValue())) {
             throw new ValidationException("左值不能为空");
@@ -317,7 +318,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AddRuleEngineConditionParam update(AddRuleEngineConditionParam update ) {
+    public ConditionParam update(ConditionParam update ) {
         RuleEngineCondition byId = getConditionById(update.getId());
         if (byId == null) {
             throw new ValidationException("条件不存在");
@@ -392,7 +393,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
      * @return 条件
      */
     @Override
-    public AddRuleEngineConditionParam get(Long id) {
+    public ConditionParam get(Long id) {
         RuleEngineCondition ruleEngineCondition = getConditionById(id);
         if (ruleEngineCondition == null) {
             return null;
@@ -407,27 +408,27 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
      * @param ruleAllConditionInfo see.. 应对规则配置页面较多规则条件时使用
      * @return 转换后的类型
      */
-    public AddRuleEngineConditionParam ruleEngineConditionTypeConversion(RuleEngineCondition condition, RuleAllConditionInfo ruleAllConditionInfo) {
-        AddRuleEngineConditionParam conditionResponse = new AddRuleEngineConditionParam();
+    public ConditionParam ruleEngineConditionTypeConversion(RuleEngineCondition condition, RuleAllConditionInfo ruleAllConditionInfo) {
+        ConditionParam conditionResponse = new ConditionParam();
         conditionResponse.setId(condition.getId());
         conditionResponse.setName(condition.getName());
         conditionResponse.setDescription(condition.getDescription());
         //配置
         ConfigBean configBean = new ConfigBean();
         //左
-        final ConfigBean.LeftBean leftBean = new ConfigBean.LeftBean(condition.getLeftValueDataType(),condition.getLeftValue(),"",condition.getLeftValueType());
+        final LeftBean leftBean = new LeftBean(condition.getLeftValueDataType(),condition.getLeftValue(),"",condition.getLeftValueType());
         getLeftBean(leftBean, ruleAllConditionInfo);
         configBean.setLeftVariable(leftBean);
         //符号
         configBean.setSymbol(condition.getSymbol());
-        final ConfigBean.LeftBean rightBean = new ConfigBean.LeftBean(condition.getRightValueDataType(), condition.getRightValue(), "", condition.getRightValueType());
+        final LeftBean rightBean = new LeftBean(condition.getRightValueDataType(), condition.getRightValue(), "", condition.getRightValueType());
         getLeftBean(rightBean, ruleAllConditionInfo);
         configBean.setRightVariable(rightBean);
         conditionResponse.setConfig(configBean);
         return conditionResponse;
     }
 
-    private void getLeftBean(ConfigBean.LeftBean leftBean, RuleAllConditionInfo ruleAllConditionInfo) {
+    private void getLeftBean(LeftBean leftBean, RuleAllConditionInfo ruleAllConditionInfo) {
         String type = leftBean.getValueDataType();
         final String value = leftBean.getValue();
         if (Objects.equals(type, ValueTypeEnum.CONSTANT.name())) {
