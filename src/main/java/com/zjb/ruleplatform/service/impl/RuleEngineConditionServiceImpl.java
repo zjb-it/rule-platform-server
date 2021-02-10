@@ -248,6 +248,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         condition.setLeftValueType(left.getValueType());
         condition.setLeftValueDataType(type);
         condition.setLeftValue(left.getValue());
+        condition.setLeftValueName(left.getValueName());
         //如果是固定值
         if (Objects.equals(type, ValueTypeEnum.CONSTANT.name())) {
             if (Validator.isEmpty(left.getValueType())) {
@@ -284,6 +285,7 @@ public class RuleEngineConditionServiceImpl implements RuleEngineConditionServic
         condition.setRightValueType(left.getValueType());
         condition.setRightValueDataType(type);
         condition.setRightValue(left.getValue());
+        condition.setRightValueName(left.getValueName());
         //如果是固定值
         if (Objects.equals(type, ValueTypeEnum.CONSTANT.name())) {
             if (Validator.isEmpty(left.getValueType())) {

@@ -4,33 +4,55 @@ import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
-import com.zjb.ruleplatform.entity.RuleEngineConditionGroup;
-import com.zjb.ruleplatform.entity.RuleEngineRule;
+import com.zjb.ruleengine.core.BaseContextImpl;
+import com.zjb.ruleengine.core.RuleEngine;
+import com.zjb.ruleengine.core.condition.AbstractCondition;
+import com.zjb.ruleengine.core.condition.ConditionSet;
+import com.zjb.ruleengine.core.condition.DefaultCondition;
+import com.zjb.ruleengine.core.config.FunctionHolder;
+import com.zjb.ruleengine.core.enums.DataTypeEnum;
+import com.zjb.ruleengine.core.enums.Symbol;
+import com.zjb.ruleengine.core.exception.RuleCompileException;
+import com.zjb.ruleengine.core.rule.Rule;
+import com.zjb.ruleengine.core.value.*;
+import com.zjb.ruleplatform.entity.*;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.AddRuleRequest;
+import com.zjb.ruleplatform.entity.dto.ConditionParam;
+import com.zjb.ruleplatform.entity.dto.RuleTest;
+import com.zjb.ruleplatform.entity.vo.ConditionGroup;
 import com.zjb.ruleplatform.entity.vo.LeftBean;
 import com.zjb.ruleplatform.entity.vo.RuleDetail;
 import com.zjb.ruleplatform.entity.vo.RuleInfo;
-import com.zjb.ruleplatform.manager.RuleEngineConditionGroupManager;
-import com.zjb.ruleplatform.manager.RuleEngineRuleManager;
+import com.zjb.ruleplatform.manager.*;
 import com.zjb.ruleplatform.mapper.CustomRuleMapper;
 import com.zjb.ruleplatform.service.RuleService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.validation.ValidationException;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.zjb.ruleplatform.entity.vo.LeftBean.ELEMENT;
+import static com.zjb.ruleplatform.entity.vo.LeftBean.VARIABLE;
 
 /**
  * @author 赵静波 <zhaojingbo>
  * Created on 2021-01-30
  */
 @Service
+@Slf4j
 public class RuleServiceImpl implements RuleService {
     @Autowired
     private RuleEngineRuleManager ruleManager;
@@ -38,6 +60,16 @@ public class RuleServiceImpl implements RuleService {
     private RuleEngineConditionGroupManager conditionGroupManager;
     @Autowired
     private CustomRuleMapper ruleMapper;
+    @Autowired
+    private RuleEngine ruleEngine;
+    @Autowired
+    private RuleEngineElementManager elementManager;
+    @Autowired
+    private RuleEngineVariableManager variableManager;
+    @Autowired
+    private RuleEngineVariableParamManager variableParamManager;
+    @Autowired
+    private FunctionHolder functionHolder;
 
     @Override
     public Long addRule(AddRuleRequest addRuleRequest) {
@@ -126,4 +158,168 @@ public class RuleServiceImpl implements RuleService {
     public RuleDetail getRule(Long id) {
         return ruleMapper.getRule(id);
     }
+
+
+    @Override
+    public Object testRule(RuleTest ruleTest) {
+        final RuleDetail rule = ruleMapper.getRule(ruleTest.getRuleId());
+        loadRule(rule);
+        BaseContextImpl context = new BaseContextImpl();
+        context.putAll(ruleTest.getRuleParam());
+        final Object result = ruleEngine.execute(rule.getCode(), context);
+        ruleEngine.removeRule(rule.getCode());
+        return result;
+    }
+
+    private void loadRule(RuleDetail rule) {
+        final Collection<Long> eleIds = rule.collectorElement();
+        final Map<Long, RuleEngineElement> elementMap = getElementMap(eleIds);
+        final Collection<Long> varIds = rule.collectorVariable();
+        final Map<Long, RuleEngineVariable> varMap = getVarMap(varIds);
+        final Map<Long, List<RuleEngineVariableParam>> varParamMap = getVarParamMap(varIds);
+
+        Value action = getValue(rule.getAction(), elementMap, varMap, varParamMap);
+
+        AbstractCondition condition = getConditonSet(rule.getConditionGroups(), elementMap, varMap, varParamMap);
+        ruleEngine.addRule(new Rule(rule.getCode(), condition, action));
+    }
+
+    private Map<Long, RuleEngineElement> getElementMap(Collection<Long> eleIds) {
+        Map<Long, RuleEngineElement> elementMap = Collections.EMPTY_MAP;
+
+        if (CollUtil.isNotEmpty(eleIds)) {
+            elementMap = elementManager.lambdaQuery()
+                    .in(RuleEngineElement::getId, eleIds)
+                    .list()
+                    .stream()
+                    .collect(Collectors.toMap(RuleEngineElement::getId, Function.identity()));
+        }
+        return elementMap;
+    }
+
+    private Map<Long, RuleEngineVariable> getVarMap(Collection<Long> varIds) {
+        Map<Long, RuleEngineVariable> varMap = Collections.EMPTY_MAP;
+        if (CollUtil.isNotEmpty(varIds)) {
+            varMap = variableManager.lambdaQuery()
+                    .in(RuleEngineVariable::getId, varIds)
+                    .list()
+                    .stream()
+                    .collect(Collectors.toMap(RuleEngineVariable::getId, Function.identity()));
+        }
+        return varMap;
+    }
+
+    private Map<Long, List<RuleEngineVariableParam>> getVarParamMap(Collection<Long> varIds) {
+        Map<Long, List<RuleEngineVariableParam>> varParamMap = Collections.EMPTY_MAP;
+        if (CollUtil.isNotEmpty(varIds)) {
+            varParamMap = variableParamManager.lambdaQuery()
+                    .in(RuleEngineVariableParam::getVariableId, varIds)
+                    .list()
+                    .stream()
+                    .collect(Collectors.groupingBy(RuleEngineVariableParam::getVariableId));
+
+        }
+        return varParamMap;
+    }
+
+    private AbstractCondition getConditonSet(List<ConditionGroup> conditionGroups, Map<Long, RuleEngineElement> elementMap, Map<Long, RuleEngineVariable> varMap, Map<Long, List<RuleEngineVariableParam>> varParamMap) {
+        final List<com.zjb.ruleengine.core.condition.ConditionGroup> engineCongtionGroups = conditionGroups
+                .stream()
+                .sorted(Comparator.comparing(ConditionGroup::getOrder))
+                .map(group -> {
+                    final List<DefaultCondition> defaultConditions = group.getConditions().stream()
+                            .map(conditionParam -> getDefaultCondition(conditionParam, elementMap, varMap, varParamMap)).collect(Collectors.toList());
+                    return new com.zjb.ruleengine.core.condition.ConditionGroup(defaultConditions);
+                }).collect(Collectors.toList());
+
+        return new ConditionSet(engineCongtionGroups);
+    }
+
+    private Value getValue(LeftBean action, Map<Long, RuleEngineElement> elementMap, Map<Long, RuleEngineVariable> varMap, Map<Long, List<RuleEngineVariableParam>> varParamMap) {
+        final String valueType = action.getValueType();
+
+        if (Objects.equals(valueType, ELEMENT)) {
+            final Long eleId = Long.valueOf(action.getValue());
+            return new Element(DataTypeEnum.valueOf(action.getValueDataType()), elementMap.get(eleId).getCode());
+
+        }
+        if (Objects.equals(valueType, VARIABLE)) {
+            final Long varId = Long.valueOf(action.getValue());
+            RuleEngineVariable dbVariable = varMap.get(varId);
+            if (dbVariable == null) {
+                dbVariable = variableManager.getById(varId);
+            }
+            Map<String, Value> params = Collections.EMPTY_MAP;
+            List<RuleEngineVariableParam> variableParams;
+            if (varParamMap.containsKey(varId)) {
+                variableParams = varParamMap.get(varId);
+            } else {
+                variableParams = variableParamManager.lambdaQuery().eq(RuleEngineVariableParam::getVariableId, varId).list();
+            }
+            if (CollUtil.isNotEmpty(variableParams)) {
+                params = variableParams
+                        .stream()
+                        .collect(Collectors.toMap(RuleEngineVariableParam::getFunctionParamName, param -> getValue(new LeftBean(param.getFunctionParamValueDataType(), param.getFunctionParamValue(), param.getFunctionParamValueDescription(), param.getFunctionParamValueType()), elementMap, varMap, varParamMap)));
+            }
+            final DataTypeEnum dataTypeByName = DataTypeEnum.getDataTypeByName(dbVariable.getValueDataType());
+            return new Variable(dataTypeByName,new VariableFunction(dbVariable.getFunctionName(), params, functionHolder));
+        }
+
+        final DataTypeEnum dataTypeEnum = DataTypeEnum.valueOf(action.getValueType());
+        //不为空，则为固定值
+        if (dataTypeEnum != null) {
+            switch (dataTypeEnum) {
+                case STRING:
+                    return new Constant(dataTypeEnum, action.getValue());
+                case NUMBER:
+                    return new Constant(dataTypeEnum, NumberUtils.createNumber(action.getValue()));
+                case POJO:
+                    //todo 只支持系统内pojo
+                    throw new UnsupportedOperationException("只支持系统内pojo,未开放");
+                case BOOLEAN:
+                    return new Constant(dataTypeEnum, Boolean.valueOf(action.getValue()));
+                case COLLECTION:
+                    try {
+                        final Collection collection = new ObjectMapper().readValue(action.getValue(), Collection.class);
+                        return new Constant(dataTypeEnum, collection);
+                    } catch (JsonProcessingException e) {
+                        log.error("{}", e);
+                        throw new RuleCompileException(e);
+                    }
+                case JSONOBJECT:
+                    final JsonNode jsonNode;
+                    try {
+                        jsonNode = new ObjectMapper().readTree(action.getValue());
+                        return new Constant(dataTypeEnum, jsonNode);
+                    } catch (JsonProcessingException e) {
+                        log.error("{}", e);
+                        throw new RuleCompileException(e);
+                    }
+
+            }
+
+
+        }
+
+
+        return null;
+    }
+
+    private DefaultCondition getDefaultCondition(ConditionParam conditionParam, Map<Long, RuleEngineElement> elementMap, Map<Long, RuleEngineVariable> varMap, Map<Long, List<RuleEngineVariableParam>> varParamMap) {
+        final Value left = getValue(conditionParam.getConfig().getLeftVariable(), elementMap, varMap, varParamMap);
+        final Value right = getValue(conditionParam.getConfig().getRightVariable(), elementMap, varMap, varParamMap);
+        final Symbol symbol = getSymbol(conditionParam.getConfig().getSymbol(), conditionParam.getConfig().getLeftVariable().getValueDataType());
+        return new DefaultCondition(conditionParam.getId() + conditionParam.getName(), left, symbol, right);
+    }
+
+    private Symbol getSymbol(String symbol, String leftValueDataType) {
+
+        final DataTypeEnum byName = DataTypeEnum.valueOf(leftValueDataType);
+        if (byName == null) {
+            throw new ValidationException(String.format("%s类型不存在", leftValueDataType));
+        }
+        return Symbol.getSymbolByDataType(byName, symbol);
+    }
+
+
 }

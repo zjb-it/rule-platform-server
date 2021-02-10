@@ -12,11 +12,15 @@
  */
 package com.zjb.ruleplatform.entity.dto;
 
+import com.google.common.collect.Sets;
+import com.zjb.ruleplatform.entity.vo.CollectorValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * 〈一句话功能简述〉<br>
@@ -28,7 +32,7 @@ import javax.validation.constraints.NotNull;
  */
 @NoArgsConstructor
 @Data
-public class ConditionParam {
+public class ConditionParam implements CollectorValue {
 
     /**
      * name : 合同编号
@@ -42,4 +46,21 @@ public class ConditionParam {
     @NotNull(message = "条件配置不能为空")
     private ConfigBean config;
 
+    @Override
+    public Collection<Long> collectorElement() {
+        final Collection<Long> left = config.getLeftVariable().collectorElement();
+        final Collection<Long> right = config.getRightVariable().collectorElement();
+        final HashSet<Long> longs = Sets.newHashSet(left);
+        longs.addAll(right);
+        return longs;
+    }
+
+    @Override
+    public Collection<Long> collectorVariable() {
+        final Collection<Long> left = config.getLeftVariable().collectorVariable();
+        final Collection<Long> right = config.getRightVariable().collectorVariable();
+        final HashSet<Long> longs = Sets.newHashSet(left);
+        longs.addAll(right);
+        return longs;
+    }
 }

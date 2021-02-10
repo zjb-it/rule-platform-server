@@ -24,11 +24,13 @@
                     <association property="leftVariable" javaType="com.zjb.ruleplatform.entity.vo.LeftBean">
                         <result property="valueType" column="left_value_type"></result>
                         <result property="value" column="left_value"></result>
+                        <result property="valueName" column="left_value_name"></result>
                         <result property="valueDataType" column="left_value_data_type"></result>
                     </association>
                     <association property="rightVariable" javaType="com.zjb.ruleplatform.entity.vo.LeftBean">
                         <result property="valueType" column="right_value_type"></result>
                         <result property="value" column="right_value"></result>
+                        <result property="valueName" column="right_value_name"></result>
                         <result property="valueDataType" column="right_value_data_type"></result>
                     </association>
 
@@ -56,9 +58,11 @@
 	con.left_value_type,
 	con.left_value_data_type,
 	con.left_value,
+	con.left_value_name,
 	con.right_value_type,
 	con.right_value_data_type,
 	con.right_value,
+	con.right_value_name,
 	con.symbol,
 	con.symbol_name,
 	con.symbol_type

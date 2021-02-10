@@ -57,6 +57,7 @@ public class RuleEngineVariableServiceImpl implements RuleEngineVariableService 
         ruleEngineVariable.setFunctionName(function1.getName());
         ruleEngineVariable.setValueDataType(param.getValueDataType());
         ruleEngineVariableManager.save(ruleEngineVariable);
+
         saveBatchVariableParam(ruleEngineVariable, function, function1);
 
         /* 新增返回变量详情*/

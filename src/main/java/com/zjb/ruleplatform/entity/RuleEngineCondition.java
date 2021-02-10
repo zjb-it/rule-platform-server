@@ -61,7 +61,8 @@ public class RuleEngineCondition implements Serializable {
     private String symbolName;
 
     private String symbolType;
-
+    private String rightValueName;
+    private String leftValueName;
     /**
      * 创建时间，
      */

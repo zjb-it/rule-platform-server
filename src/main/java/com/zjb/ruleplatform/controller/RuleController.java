@@ -99,6 +99,11 @@ public class RuleController {
         return new PlainResult<>(ruleService.getRule(id));
     }
 
+    @ApiOperation("测试")
+    @PostMapping("/test")
+    public PlainResult<Object> test(@RequestBody @Valid RuleTest ruleTest) {
+        return new PlainResult<>(ruleService.testRule(ruleTest));
+    }
 
 
     ///**

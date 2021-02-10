@@ -3,6 +3,7 @@ package com.zjb.ruleplatform.service;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.AddRuleRequest;
+import com.zjb.ruleplatform.entity.dto.RuleTest;
 import com.zjb.ruleplatform.entity.vo.RuleDetail;
 import com.zjb.ruleplatform.entity.vo.RuleInfo;
 
@@ -21,5 +22,7 @@ public interface RuleService {
     PageResult<RuleInfo> pageRule(PageRequest<String> pageRequest);
 
     RuleDetail getRule(Long id);
+
+    Object testRule(RuleTest ruleTest);
 
 }
