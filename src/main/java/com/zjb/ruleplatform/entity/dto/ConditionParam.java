@@ -14,6 +14,7 @@ package com.zjb.ruleplatform.entity.dto;
 
 import com.google.common.collect.Sets;
 import com.zjb.ruleplatform.entity.vo.CollectorValue;
+import com.zjb.ruleplatform.manager.RuleEngineVariableParamManager;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -47,18 +48,18 @@ public class ConditionParam implements CollectorValue {
     private ConfigBean config;
 
     @Override
-    public Collection<Long> collectorElement() {
-        final Collection<Long> left = config.getLeftVariable().collectorElement();
-        final Collection<Long> right = config.getRightVariable().collectorElement();
+    public Collection<Long> collectorElement(RuleEngineVariableParamManager variableParamManager) {
+        final Collection<Long> left = config.getLeftVariable().collectorElement(variableParamManager);
+        final Collection<Long> right = config.getRightVariable().collectorElement(variableParamManager);
         final HashSet<Long> longs = Sets.newHashSet(left);
         longs.addAll(right);
         return longs;
     }
 
     @Override
-    public Collection<Long> collectorVariable() {
-        final Collection<Long> left = config.getLeftVariable().collectorVariable();
-        final Collection<Long> right = config.getRightVariable().collectorVariable();
+    public Collection<Long> collectorVariable(RuleEngineVariableParamManager variableParamManager) {
+        final Collection<Long> left = config.getLeftVariable().collectorVariable(variableParamManager);
+        final Collection<Long> right = config.getRightVariable().collectorVariable(variableParamManager);
         final HashSet<Long> longs = Sets.newHashSet(left);
         longs.addAll(right);
         return longs;

@@ -9,7 +9,7 @@ import com.zjb.ruleplatform.entity.vo.FunctionDetailVo;
 /**
  * @author yuzhiji
  */
-public interface RuleEngineFunctionService {
+public interface FunctionService {
     /**
      * 查找 function
      *

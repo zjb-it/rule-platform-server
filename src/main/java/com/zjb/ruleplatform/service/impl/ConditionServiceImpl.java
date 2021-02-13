@@ -35,7 +35,7 @@ import com.zjb.ruleplatform.manager.RuleEngineConditionManager;
 import com.zjb.ruleplatform.manager.RuleEngineElementManager;
 import com.zjb.ruleplatform.manager.RuleEngineVariableManager;
 import com.zjb.ruleplatform.service.ISymbolService;
-import com.zjb.ruleplatform.service.RuleEngineConditionService;
+import com.zjb.ruleplatform.service.ConditionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 @Service
 @Slf4j
-public class RuleEngineConditionServiceImpl implements RuleEngineConditionService {
+public class ConditionServiceImpl implements ConditionService {
     @Resource
     private RuleEngineConditionManager ruleEngineConditionManager;
     @Resource

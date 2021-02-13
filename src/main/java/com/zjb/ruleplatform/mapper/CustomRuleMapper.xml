@@ -12,7 +12,7 @@
             <result property="value" column="action_value"></result>
             <result property="valueDataType" column="action_value_data_type"></result>
         </association>
-        <collection property="conditionGroups" ofType="com.zjb.ruleplatform.entity.vo.ConditionGroup">
+        <collection property="conditionGroups" ofType="com.zjb.ruleplatform.entity.vo.ConditionGroupDetail">
             <result property="order" column="condition_group_order"></result>
             <collection property="conditions" ofType="com.zjb.ruleplatform.entity.dto.ConditionParam">
                 <id property="id" column="conId"></id>

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author v-dingqianwen.ea
  */
-public interface RuleEngineConditionService {
+public interface ConditionService {
     /**
      * 分页查询条件
      *

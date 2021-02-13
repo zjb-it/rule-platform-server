@@ -1,6 +1,7 @@
 package com.zjb.ruleplatform.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.StrFormatter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,8 +16,10 @@ import com.zjb.ruleengine.core.condition.ConditionSet;
 import com.zjb.ruleengine.core.condition.DefaultCondition;
 import com.zjb.ruleengine.core.config.FunctionHolder;
 import com.zjb.ruleengine.core.enums.DataTypeEnum;
+import com.zjb.ruleengine.core.enums.RuleStatusEnum;
 import com.zjb.ruleengine.core.enums.Symbol;
 import com.zjb.ruleengine.core.exception.RuleCompileException;
+import com.zjb.ruleengine.core.rule.AbstractRule;
 import com.zjb.ruleengine.core.rule.Rule;
 import com.zjb.ruleengine.core.value.*;
 import com.zjb.ruleplatform.entity.*;
@@ -25,7 +28,7 @@ import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.AddRuleRequest;
 import com.zjb.ruleplatform.entity.dto.ConditionParam;
 import com.zjb.ruleplatform.entity.dto.RuleTest;
-import com.zjb.ruleplatform.entity.vo.ConditionGroup;
+import com.zjb.ruleplatform.entity.vo.ConditionGroupDetail;
 import com.zjb.ruleplatform.entity.vo.LeftBean;
 import com.zjb.ruleplatform.entity.vo.RuleDetail;
 import com.zjb.ruleplatform.entity.vo.RuleInfo;
@@ -74,6 +77,7 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public Long addRule(AddRuleRequest addRuleRequest) {
         final RuleEngineRule rule = convertToDbRule(addRuleRequest);
+        rule.setStatus(RuleStatusEnum.unpublish.status);
         ruleManager.save(rule);
 
         this.saveConditionGroups(addRuleRequest.getConditionGroups(), rule.getId());
@@ -113,11 +117,13 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
-    public boolean updateRule(AddRuleRequest addRuleRequest) {
-        ruleManager.updateById(convertToDbRule(addRuleRequest));
+    public Long updateRule(AddRuleRequest addRuleRequest) {
+        final RuleEngineRule ruleEngineRule = convertToDbRule(addRuleRequest);
+        ruleEngineRule.setStatus(RuleStatusEnum.unpublish.status);
+        ruleManager.updateById(ruleEngineRule);
         removeConditionGroups(addRuleRequest.getId());
         saveConditionGroups(addRuleRequest.getConditionGroups(), addRuleRequest.getId());
-        return false;
+        return addRuleRequest.getId();
     }
 
     @Override
@@ -156,7 +162,9 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public RuleDetail getRule(Long id) {
-        return ruleMapper.getRule(id);
+        final RuleDetail rule = ruleMapper.getRule(id);
+        rule.setParamIds(rule.collectorElement(variableParamManager));
+        return rule ;
     }
 
 
@@ -164,17 +172,51 @@ public class RuleServiceImpl implements RuleService {
     public Object testRule(RuleTest ruleTest) {
         final RuleDetail rule = ruleMapper.getRule(ruleTest.getRuleId());
         loadRule(rule);
+
+        final AbstractRule engineRule = ruleEngine.getRule(rule.getCode());
+        final Collection<Element> elements = engineRule.collectParameter();
+        final Map<String, Element> elementMap = elements.stream().collect(Collectors.toMap(Element::getCode, Function.identity()));
         BaseContextImpl context = new BaseContextImpl();
-        context.putAll(ruleTest.getRuleParam());
+        ruleTest.getRuleParam().forEach((k,v)->{
+            if (elementMap.containsKey(k)) {
+                final Element element = elementMap.get(k);
+                final Class eleClazz = element.getDataTypeEnum().getClazz();
+                if (v.getClass().isAssignableFrom(eleClazz)) {
+                    context.put(k, v);
+                } else {
+                    final ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        context.put(k, objectMapper.readValue(objectMapper.writeValueAsString(v),eleClazz));
+                    } catch (JsonProcessingException e) {
+                        throw new ValidationException(StrFormatter.format("{}数据类型错误,不能转换为{}",element.getCode(),eleClazz));
+                    }
+                }
+            } else {
+                context.put(k, v);
+            }
+        });
+
         final Object result = ruleEngine.execute(rule.getCode(), context);
         ruleEngine.removeRule(rule.getCode());
         return result;
     }
 
+    @Override
+    public Boolean publish(Long ruleId) {
+        ruleManager.lambdaUpdate()
+                .set(RuleEngineRule::getStatus, RuleStatusEnum.published.status)
+                .eq(RuleEngineRule::getId, ruleId)
+                .update();
+
+        final RuleDetail rule = ruleMapper.getRule(ruleId);
+        loadRule(rule);
+        return Boolean.TRUE;
+    }
+
     private void loadRule(RuleDetail rule) {
-        final Collection<Long> eleIds = rule.collectorElement();
+        final Collection<Long> eleIds = rule.collectorElement(variableParamManager);
         final Map<Long, RuleEngineElement> elementMap = getElementMap(eleIds);
-        final Collection<Long> varIds = rule.collectorVariable();
+        final Collection<Long> varIds = rule.collectorVariable(variableParamManager);
         final Map<Long, RuleEngineVariable> varMap = getVarMap(varIds);
         final Map<Long, List<RuleEngineVariableParam>> varParamMap = getVarParamMap(varIds);
 
@@ -222,10 +264,10 @@ public class RuleServiceImpl implements RuleService {
         return varParamMap;
     }
 
-    private AbstractCondition getConditonSet(List<ConditionGroup> conditionGroups, Map<Long, RuleEngineElement> elementMap, Map<Long, RuleEngineVariable> varMap, Map<Long, List<RuleEngineVariableParam>> varParamMap) {
+    private AbstractCondition getConditonSet(List<ConditionGroupDetail> conditionGroups, Map<Long, RuleEngineElement> elementMap, Map<Long, RuleEngineVariable> varMap, Map<Long, List<RuleEngineVariableParam>> varParamMap) {
         final List<com.zjb.ruleengine.core.condition.ConditionGroup> engineCongtionGroups = conditionGroups
                 .stream()
-                .sorted(Comparator.comparing(ConditionGroup::getOrder))
+                .sorted(Comparator.comparing(ConditionGroupDetail::getOrder))
                 .map(group -> {
                     final List<DefaultCondition> defaultConditions = group.getConditions().stream()
                             .map(conditionParam -> getDefaultCondition(conditionParam, elementMap, varMap, varParamMap)).collect(Collectors.toList());
@@ -246,16 +288,16 @@ public class RuleServiceImpl implements RuleService {
         if (Objects.equals(valueType, VARIABLE)) {
             final Long varId = Long.valueOf(action.getValue());
             RuleEngineVariable dbVariable = varMap.get(varId);
-            if (dbVariable == null) {
-                dbVariable = variableManager.getById(varId);
-            }
+            //if (dbVariable == null) {
+            //    dbVariable = variableManager.getById(varId);
+            //}
             Map<String, Value> params = Collections.EMPTY_MAP;
             List<RuleEngineVariableParam> variableParams;
-            if (varParamMap.containsKey(varId)) {
+            //if (varParamMap.containsKey(varId)) {
                 variableParams = varParamMap.get(varId);
-            } else {
-                variableParams = variableParamManager.lambdaQuery().eq(RuleEngineVariableParam::getVariableId, varId).list();
-            }
+            //} else {
+            //    variableParams = variableParamManager.lambdaQuery().eq(RuleEngineVariableParam::getVariableId, varId).list();
+            //}
             if (CollUtil.isNotEmpty(variableParams)) {
                 params = variableParams
                         .stream()

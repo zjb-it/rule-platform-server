@@ -87,7 +87,7 @@ public class ElementServiceImpl implements ElementService {
 
 
     @Override
-    public ElementResponse get(Integer id) {
+    public ElementResponse get(Long id) {
         RuleEngineElement ruleEngineElement = ruleEngineElementManager.getById(id);
         ElementResponse elementResponse = new ElementResponse();
         if (Validator.isEmpty(ruleEngineElement)) {

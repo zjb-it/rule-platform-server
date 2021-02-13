@@ -1,7 +1,6 @@
 package com.zjb.ruleplatform.entity.vo;
 
-import com.zjb.ruleplatform.entity.dto.ConditionParam;
-import com.zjb.ruleplatform.entity.dto.ConfigBean;
+import com.zjb.ruleplatform.manager.RuleEngineVariableParamManager;
 import lombok.Data;
 
 import java.util.Collection;
@@ -18,16 +17,18 @@ public class RuleDetail extends RuleInfo implements CollectorValue{
 
     private LeftBean action;
 
-    private List<ConditionGroup> conditionGroups;
+    private List<ConditionGroupDetail> conditionGroups;
+
+    private Collection<Long> paramIds;
 
     @Override
-    public Collection<Long> collectorElement() {
-        final Collection<Long> actionElementIds = action.collectorElement();
+    public Collection<Long> collectorElement(RuleEngineVariableParamManager variableParamManager) {
+        final Collection<Long> actionElementIds = action.collectorElement(variableParamManager);
 
         final Set<Long> collect = conditionGroups.stream().flatMap(group ->
              group.getConditions()
                     .stream()
-                    .flatMap(param -> param.collectorElement().stream())
+                    .flatMap(param -> param.collectorElement(variableParamManager).stream())
                     .collect(Collectors.toList())
                     .stream()
         ).collect(Collectors.toSet());
@@ -36,13 +37,13 @@ public class RuleDetail extends RuleInfo implements CollectorValue{
     }
 
     @Override
-    public Collection<Long> collectorVariable() {
-        final Collection<Long> actionElementIds = action.collectorVariable();
+    public Collection<Long> collectorVariable(RuleEngineVariableParamManager variableParamManager) {
+        final Collection<Long> actionElementIds = action.collectorVariable(variableParamManager);
 
         final Set<Long> collect = conditionGroups.stream().flatMap(group ->
                 group.getConditions()
                         .stream()
-                        .flatMap(param -> param.collectorVariable().stream())
+                        .flatMap(param -> param.collectorVariable(variableParamManager).stream())
                         .collect(Collectors.toList())
                         .stream()
         ).collect(Collectors.toSet());

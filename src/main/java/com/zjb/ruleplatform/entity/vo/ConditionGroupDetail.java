@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ConditionGroup {
+public class ConditionGroupDetail {
     private List<ConditionParam> conditions;
     private Integer order;
 }

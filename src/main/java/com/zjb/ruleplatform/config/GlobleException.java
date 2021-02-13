@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * @author 赵静波 <wb_zhaojingbo@kuaishou.com>
+ * @author 赵静波
  * Created on 2021-02-10
  */
 @ControllerAdvice

@@ -11,7 +11,7 @@ import com.zjb.ruleplatform.entity.vo.ListRuleEngineVariableResponse;
 /**
  * @author yuzhiji
  */
-public interface RuleEngineVariableService {
+public interface VariableService {
 
 
     GetRuleEngineVariableResponse getVariable(Long variableId);

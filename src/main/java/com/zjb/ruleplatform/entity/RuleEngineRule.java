@@ -46,7 +46,8 @@ public class RuleEngineRule implements Serializable {
      * 描述，
      */
     private String description;
-
+//0 编辑中，1待发布，2已发布
+    private Integer status;
     /**
      * 创建用户名称，
      */

@@ -12,14 +12,12 @@
  */
 package com.zjb.ruleplatform.controller;
 
-import com.zjb.ruleplatform.entity.common.ListResult;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.common.PlainResult;
 import com.zjb.ruleplatform.entity.dto.*;
 import com.zjb.ruleplatform.entity.vo.RuleDetail;
 import com.zjb.ruleplatform.entity.vo.RuleInfo;
-import com.zjb.ruleplatform.service.RuleEngineConditionService;
 import com.zjb.ruleplatform.service.RuleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * 〈一句话功能简述〉<br>
@@ -76,7 +73,7 @@ public class RuleController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public PlainResult<Boolean> update(@Valid @RequestBody AddRuleRequest add) {
+    public PlainResult<Long> update(@Valid @RequestBody AddRuleRequest add) {
         return new PlainResult<>(ruleService.updateRule(add));
     }
 
@@ -105,6 +102,11 @@ public class RuleController {
         return new PlainResult<>(ruleService.testRule(ruleTest));
     }
 
+    @ApiOperation("发布")
+    @GetMapping("/publish")
+    public PlainResult<Object> publish(@RequestParam Long ruleId) {
+        return new PlainResult<>(ruleService.publish(ruleId));
+    }
 
     ///**
     // * 根据Ids批量查询条件

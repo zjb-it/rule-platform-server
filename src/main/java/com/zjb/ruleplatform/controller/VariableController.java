@@ -12,17 +12,14 @@
  */
 package com.zjb.ruleplatform.controller;
 
-import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.common.PlainResult;
-import com.zjb.ruleplatform.entity.dto.IdLRequest;
-import com.zjb.ruleplatform.entity.dto.IdsRequest;
 import com.zjb.ruleplatform.entity.dto.ListRuleEngineVariableRequest;
 import com.zjb.ruleplatform.entity.dto.RuleEngineVariableRequest;
 import com.zjb.ruleplatform.entity.vo.GetRuleEngineVariableResponse;
 import com.zjb.ruleplatform.entity.vo.ListRuleEngineVariableResponse;
-import com.zjb.ruleplatform.service.RuleEngineVariableService;
+import com.zjb.ruleplatform.service.VariableService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -31,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 
 /**
  * 〈一句话功能简述〉<br>
@@ -45,10 +41,10 @@ import javax.validation.ValidationException;
 @Api(tags = "规则引擎变量")
 @RequestMapping("/ruleEngine/variable")
 @Slf4j
-public class RuleEngineVariableController {
+public class VariableController {
 
     @Resource
-    private RuleEngineVariableService ruleEngineVariableService;
+    private VariableService variableService;
 
     /**
      * 分页查询变量
@@ -59,7 +55,7 @@ public class RuleEngineVariableController {
     @PostMapping("/list")
     @ApiOperation("分页查询变量")
     public PageResult<ListRuleEngineVariableResponse> list(@ApiParam @RequestBody PageRequest<ListRuleEngineVariableRequest> pageRequest) {
-        return ruleEngineVariableService.listVariable(pageRequest);
+        return variableService.listVariable(pageRequest);
     }
 
 
@@ -72,7 +68,7 @@ public class RuleEngineVariableController {
     @ApiOperation("添加变量")
     @PostMapping("/add")
     public PlainResult<GetRuleEngineVariableResponse> add(@ApiParam @Valid @RequestBody RuleEngineVariableRequest add) {
-        return new PlainResult<>(ruleEngineVariableService.addVariable(add));
+        return new PlainResult<>(variableService.addVariable(add));
     }
 
 
@@ -82,7 +78,7 @@ public class RuleEngineVariableController {
     @ApiOperation("获取变量")
     @GetMapping("/get")
     public PlainResult<GetRuleEngineVariableResponse> getVariable(@RequestParam Long id) {
-        return new PlainResult<>(ruleEngineVariableService.getVariable(id));
+        return new PlainResult<>(variableService.getVariable(id));
     }
 
 

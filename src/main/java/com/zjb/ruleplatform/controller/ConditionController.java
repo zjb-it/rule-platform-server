@@ -17,7 +17,7 @@ import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.common.PlainResult;
 import com.zjb.ruleplatform.entity.dto.*;
-import com.zjb.ruleplatform.service.RuleEngineConditionService;
+import com.zjb.ruleplatform.service.ConditionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,9 +40,9 @@ import java.util.List;
 @RestController
 @Api(tags = "规则引擎条件")
 @RequestMapping("/ruleEngine/condition")
-public class RuleEngineConditionController {
+public class ConditionController {
     @Resource
-    private RuleEngineConditionService ruleEngineConditionService;
+    private ConditionService ruleEngineConditionService;
 
     /**
      * 分页查询条件

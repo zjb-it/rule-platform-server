@@ -21,6 +21,6 @@ public class RuleInfo {
 
     private String description;
 
-    private String status;
+    private Integer status;
 
 }

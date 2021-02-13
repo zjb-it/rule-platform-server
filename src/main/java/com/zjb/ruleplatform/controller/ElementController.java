@@ -25,7 +25,7 @@ import java.util.List;
 @RequestMapping("/ruleEngine/element")
 @Api(tags = "规则引擎元素")
 @Slf4j
-public class RuleEngineElementController {
+public class ElementController {
 
     @Resource
     private ElementService elementService;
@@ -57,10 +57,10 @@ public class RuleEngineElementController {
      * @return ElementResponse
      */
     @ApiOperation("根据Id查询元素")
-    @PostMapping("/get")
-    public PlainResult<ElementResponse> getById(@RequestBody @Valid IdRequest id) {
+    @GetMapping("/get")
+    public PlainResult<ElementResponse> getById(@RequestParam  Long id) {
         PlainResult<ElementResponse> result = new PlainResult<>();
-        ElementResponse elementResponse = elementService.get(id.getId());
+        ElementResponse elementResponse = elementService.get(id);
         result.setData(elementResponse);
         return result;
     }

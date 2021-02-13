@@ -29,7 +29,7 @@ public interface ElementService {
      * @param id
      * @return
      */
-    ElementResponse get(Integer id);
+    ElementResponse get(Long id);
 
     /**
      * 新增元素

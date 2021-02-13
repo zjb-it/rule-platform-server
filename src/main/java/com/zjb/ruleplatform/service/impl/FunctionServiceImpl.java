@@ -6,7 +6,6 @@ import java.util.*;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -22,7 +21,7 @@ import com.zjb.ruleplatform.entity.dto.AddHttpFunction;
 import com.zjb.ruleplatform.entity.vo.FunctionDetailVo;
 import com.zjb.ruleplatform.manager.RuleEngineFunctionManager;
 import com.zjb.ruleplatform.manager.RuleEngineFunctionParamManager;
-import com.zjb.ruleplatform.service.RuleEngineFunctionService;
+import com.zjb.ruleplatform.service.FunctionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
  * @author yuzhiji
  */
 @Service
-public class RuleEngineFunctionServiceImpl implements RuleEngineFunctionService {
+public class FunctionServiceImpl implements FunctionService {
 
     @Autowired
     private FunctionHolder functionHolder;

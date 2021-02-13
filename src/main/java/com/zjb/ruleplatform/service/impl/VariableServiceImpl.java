@@ -15,7 +15,7 @@ import com.zjb.ruleplatform.entity.vo.FunctionVo;
 import com.zjb.ruleplatform.entity.vo.GetRuleEngineVariableResponse;
 import com.zjb.ruleplatform.entity.vo.ListRuleEngineVariableResponse;
 import com.zjb.ruleplatform.manager.*;
-import com.zjb.ruleplatform.service.RuleEngineVariableService;
+import com.zjb.ruleplatform.service.VariableService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class RuleEngineVariableServiceImpl implements RuleEngineVariableService {
+public class VariableServiceImpl implements VariableService {
 
     @Autowired
     private FunctionHolder functionHolder;
