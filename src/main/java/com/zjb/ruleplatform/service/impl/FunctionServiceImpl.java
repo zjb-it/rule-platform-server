@@ -23,6 +23,7 @@ import com.zjb.ruleplatform.manager.RuleEngineFunctionManager;
 import com.zjb.ruleplatform.manager.RuleEngineFunctionParamManager;
 import com.zjb.ruleplatform.service.FunctionService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,7 +64,7 @@ public class FunctionServiceImpl implements FunctionService {
         final ArrayList<FunctionDetailVo> data = Lists.newArrayList();
         functions.forEach((k, v) -> {
             if (v.getName().contains(name)) {
-                if (DataTypeEnum.getDataTypeByClass(v.getResultClass()).getClazz().isAssignableFrom(dataTypeByName.getClazz())) {
+                if (dataTypeByName.getClazz().isAssignableFrom(DataTypeEnum.getDataTypeByClass(v.getResultClass()).getClazz())) {
                     final FunctionDetailVo functionVo = new FunctionDetailVo();
                     functionVo.setDescription(functionDesc.get(k));
                     functionVo.setName(k);

@@ -98,7 +98,7 @@ public class ISymbolServiceImpl implements ISymbolService {
                 arrayList.add(sr);
             }
         } else {
-            throw new ValidationException("不支持此类型");
+            throw new ValidationException("暂不支持"+valueDataType+"的比较");
         }
         return arrayList;
     }
