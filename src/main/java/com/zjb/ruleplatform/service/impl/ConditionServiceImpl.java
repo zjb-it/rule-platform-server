@@ -98,37 +98,37 @@ public class ConditionServiceImpl implements ConditionService {
             response.setName(e.getName());
             String left = "";
             //判断左边值类型
-            final String leftValueType = e.getLeftValueType();
+            //final String leftValueType = e.getLeftValueType();
             /*if (Objects.equals(leftValueType, ValueTypeEnum.CONSTANT.name())) {
                 //固定值
                 left = e.getLeftValue();
             } else*/
-            if (Objects.equals(leftValueType, ValueTypeEnum.VARIABLE.name())) {
-                //变量
-                left = variableMap.get(Long.parseLong(e.getLeftValue())).getName();
-            } else if (Objects.equals(leftValueType, ValueTypeEnum.ELEMENT.name())) {
-                //元素
-                left = elementMap.get(Long.parseLong(e.getLeftValue())).getName();
-
-            } else {
+            //if (Objects.equals(leftValueType, ValueTypeEnum.VARIABLE.name())) {
+            //    //变量
+            //    left = variableMap.get(Long.parseLong(e.getLeftValue())).getName();
+            //} else if (Objects.equals(leftValueType, ValueTypeEnum.ELEMENT.name())) {
+            //    //元素
+            //    left = elementMap.get(Long.parseLong(e.getLeftValue())).getName();
+            //
+            //} else {
                 left = e.getLeftValueName();
-            }
+            //}
             //判断右边值类型
             String right = "";
-            final String rightValueType = e.getRightValueType();
+            //final String rightValueType = e.getRightValueType();
             /*if (Objects.equals(rightValueType, ValueTypeEnum.CONSTANT.name())) {
                 //固定值
                 right = e.getRightValue();
             } else*/
-            if (Objects.equals(rightValueType, ValueTypeEnum.VARIABLE.name())) {
-                //变量
-                right = variableMap.get(Long.parseLong(e.getRightValue())).getName();
-            } else if (Objects.equals(rightValueType, ValueTypeEnum.ELEMENT.name())) {
-                //元素
-                right = elementMap.get(Long.parseLong(e.getRightValue())).getName();
-            } else {
+            //if (Objects.equals(rightValueType, ValueTypeEnum.VARIABLE.name())) {
+            //    //变量
+            //    right = variableMap.get(Long.parseLong(e.getRightValue())).getName();
+            //} else if (Objects.equals(rightValueType, ValueTypeEnum.ELEMENT.name())) {
+            //    //元素
+            //    right = elementMap.get(Long.parseLong(e.getRightValue())).getName();
+            //} else {
                 right = e.getRightValueName();
-            }
+            //}
             response.setConfig(String.format("%s %s %s", left, e.getSymbol(), right));
             return response;
         }).collect(Collectors.toList());
