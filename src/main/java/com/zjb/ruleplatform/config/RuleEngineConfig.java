@@ -66,27 +66,11 @@ public class RuleEngineConfig {
             functionHolder.registerFunction(getFunction(fun, funParamMap.get(fun.getId())));
         });
 
-        //ruleEngineFunctions.stream().forEach(fun -> {
-        //    final FunctionDetailVo vo = new FunctionDetailVo();
-        //    vo.setName(fun.getCode());
-        //    vo.setDescription(fun.getName());
-        //    if (funParamMap.containsKey(fun.getId())) {
-        //        final List<FunctionDetailVo.VariablesBean> params = funParamMap.get(fun.getId()).stream().map(param -> {
-        //            final FunctionDetailVo.VariablesBean bean = new FunctionDetailVo.VariablesBean();
-        //            bean.setValueDataType(param.getValueDataType());
-        //            bean.setDescription(param.getFunctionParamName());
-        //            bean.setName(param.getFunctionParamCode());
-        //            return bean;
-        //        }).collect(Collectors.toList());
-        //        vo.setVariables(params);
-        //
-        //    }
-        //    data.add(vo);
-        //});
+
         return functionHolder;
     }
 
-    private Function getFunction(RuleEngineFunction function, List<RuleEngineFunctionParam> functionParams) {
+    public Function getFunction(RuleEngineFunction function, List<RuleEngineFunctionParam> functionParams) {
         if (function.getValueDataType().equals(DataTypeEnum.JSONOBJECT.name())) {
             return new HttpJsonObjectFunction() {
                 @Override

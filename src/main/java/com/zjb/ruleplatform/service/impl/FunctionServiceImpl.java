@@ -13,6 +13,7 @@ import com.google.common.collect.Maps;
 import com.zjb.ruleengine.core.config.FunctionHolder;
 import com.zjb.ruleengine.core.enums.DataTypeEnum;
 import com.zjb.ruleengine.core.function.Function;
+import com.zjb.ruleplatform.config.RuleEngineConfig;
 import com.zjb.ruleplatform.entity.RuleEngineFunction;
 import com.zjb.ruleplatform.entity.RuleEngineFunctionParam;
 import com.zjb.ruleplatform.entity.common.PageRequest;
@@ -40,6 +41,8 @@ public class FunctionServiceImpl implements FunctionService {
     @Autowired
     private FunctionHolder functionHolder;
     @Autowired
+    private RuleEngineConfig ruleEngineConfig;
+    @Autowired
     private RuleEngineFunctionManager functionManager;
     @Autowired
     private RuleEngineFunctionParamManager functionParamManager;
@@ -65,7 +68,7 @@ public class FunctionServiceImpl implements FunctionService {
         final ArrayList<FunctionDetailVo> data = Lists.newArrayList();
         functions.forEach((k, v) -> {
             if (v.getName().contains(name)) {
-                if (dataTypeByName.getClazz().isAssignableFrom(DataTypeEnum.getDataTypeByClass(v.getResultClass()).getClazz())) {
+                if (DataTypeEnum.getDataTypeByClass(v.getResultClass()).getClazz().isAssignableFrom(dataTypeByName.getClazz())) {
                     final FunctionDetailVo functionVo = new FunctionDetailVo();
                     functionVo.setDescription(functionDesc.get(k));
                     functionVo.setName(k);
@@ -80,17 +83,32 @@ public class FunctionServiceImpl implements FunctionService {
         });
         PageResult<FunctionDetailVo> result = new PageResult<>();
         result.setData(data);
-
+        if (CollUtil.isEmpty(data)) {
+            return result;
+        }
         final List<String> funNames = data.stream().map(FunctionDetailVo::getName).collect(Collectors.toList());
         final Map<String, String> funNameMap = functionManager.lambdaQuery()
                 .in(RuleEngineFunction::getCode, funNames)
                 .list()
                 .stream()
                 .collect(Collectors.toMap(RuleEngineFunction::getCode, RuleEngineFunction::getName));
+        HashBasedTable<String, String, String> functionPropertyName = HashBasedTable.create();
+        final List<RuleEngineFunctionParam> functionParams = functionParamManager.lambdaQuery().in(RuleEngineFunctionParam::getFunctionCode, funNames).list();
+        if (CollUtil.isNotEmpty(functionParams)) {
+            for (RuleEngineFunctionParam functionParam : functionParams) {
+                functionPropertyName.put(functionParam.getFunctionCode(), functionParam.getFunctionParamCode(), functionParam.getFunctionParamName());
+            }
+        }
+
         data.stream().forEach(fun->{
             if (funNameMap.containsKey(fun.getName())) {
                 fun.setDescription(funNameMap.get(fun.getName()));
             }
+            fun.getVariables().forEach(param->{
+                if (functionPropertyName.contains(fun.getName(), param.getName())) {
+                    param.setDescription(functionPropertyName.get(fun.getName(), param.getName()));
+                }
+            });
         });
 
 
@@ -113,6 +131,7 @@ public class FunctionServiceImpl implements FunctionService {
         ruleEngineFunction.setCodeName(function.getCode() + function.getName());
         functionManager.save(ruleEngineFunction);
         saveParams(function, ruleEngineFunction);
+
         return true;
     }
 
@@ -122,10 +141,12 @@ public class FunctionServiceImpl implements FunctionService {
             functionParam.setFunctionId(ruleEngineFunction.getId());
             functionParam.setFunctionParamCode(param.getCode());
             functionParam.setFunctionParamName(param.getName());
+            functionParam.setFunctionCode(function.getCode());
             functionParam.setValueDataType(param.getValueDataType());
             return functionParam;
         }).collect(Collectors.toList());
-
+        //注册function
+        functionHolder.registerFunction(ruleEngineConfig.getFunction(ruleEngineFunction, collect));
         functionParamManager.saveBatch(collect);
     }
 

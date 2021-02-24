@@ -32,6 +32,7 @@ public class RuleEngineFunctionParam implements Serializable {
      * ，
      */
     private Long functionId;
+    private String functionCode;
 
     /**
      * ，

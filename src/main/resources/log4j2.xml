@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="pattern">[%-5level] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%logger{36}:%M:%L] - %msg requestId:[%X{requestId}]%n</Property>
+        <Property name="logDir">./log</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="${pattern}"/>
+        </Console>
+
+        <RollingFile name="rolling_file"
+                     fileName="${logDir}/main.log"
+                     filePattern="${logDir}/main_%d{yyyy-MM-dd}.log">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>${pattern}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <!-- 日志保留策略，配置只保留七天 -->
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logDir}/" maxDepth="1">
+                    <IfFileName glob="main_*.log" />
+                    <IfLastModified age="7d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="rolling_file"/>
+        </Root>
+    </Loggers>
+</Configuration>
