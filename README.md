@@ -69,12 +69,12 @@
 
 ### 规则
 
-![基础组件](https://github.com/zjb-it/rule-platform-server/blob/master/screenshot/basic.png)
+![基础组件](https://github.com/zjb-it/rule-platform-server/blob/master/screenshot/rule.png)
 
 ### 规则集
 
-![基础组件](https://github.com/zjb-it/rule-platform-server/blob/master/screenshot/rule.png)
+![基础组件](https://github.com/zjb-it/rule-platform-server/blob/master/screenshot/ruleset.png)
 
 ### 决策表
 
-![基础组件](https://github.com/zjb-it/rule-platform-server/blob/master/screenshot/design.png)
+![基础组件](https://github.com/zjb-it/rule-platform-server/blob/master/screenshot/decision.png)
