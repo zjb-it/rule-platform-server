@@ -100,7 +100,7 @@ FROM
 	con.symbol_name,
 	con.symbol_type
 FROM
-	( SELECT `id`, `name`, `code`, `description`, `action_value_type`, `action_value`, `action_value_data_type` FROM rule_engine_rule) rule
+	( SELECT `id`, `name`, `code`, `description`, `action_value_type`, `action_value`, `action_value_data_type` FROM rule_engine_rule where status='2') rule
 	LEFT JOIN `rule_engine_condition_group` conGroup ON rule.id = conGroup.rule_id
 	LEFT JOIN rule_engine_condition con ON conGroup.condition_id = con.id
 
