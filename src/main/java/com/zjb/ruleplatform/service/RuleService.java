@@ -1,5 +1,6 @@
 package com.zjb.ruleplatform.service;
 
+import com.zjb.ruleengine.core.rule.AbstractRule;
 import com.zjb.ruleplatform.entity.common.PageRequest;
 import com.zjb.ruleplatform.entity.common.PageResult;
 import com.zjb.ruleplatform.entity.dto.AddRuleRequest;
@@ -26,5 +27,7 @@ public interface RuleService {
     Object testRule(RuleTest ruleTest);
 
     Boolean publish(Long ruleId);
+
+    AbstractRule convertRule(RuleDetail rule);
 
 }

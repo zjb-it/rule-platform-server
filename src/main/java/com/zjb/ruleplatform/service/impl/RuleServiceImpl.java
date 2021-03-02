@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.zjb.ruleengine.core.BaseContextImpl;
+import com.zjb.ruleengine.core.DefaultRuleEngine;
 import com.zjb.ruleengine.core.RuleEngine;
 import com.zjb.ruleengine.core.condition.AbstractCondition;
 import com.zjb.ruleengine.core.condition.ConditionSet;
@@ -42,6 +43,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.validation.ValidationException;
 import java.util.*;
 import java.util.function.Function;
@@ -73,6 +75,12 @@ public class RuleServiceImpl implements RuleService {
     private RuleEngineVariableParamManager variableParamManager;
     @Autowired
     private FunctionHolder functionHolder;
+
+    @PostConstruct
+    public void loadAllRule() {
+        final List<RuleDetail> ruleDetails = ruleMapper.listRules();
+        ruleDetails.forEach(rule->ruleEngine.addRule(this.convertRule(rule)));
+    }
 
     @Override
     public Long addRule(AddRuleRequest addRuleRequest) {
@@ -171,7 +179,7 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public Object testRule(RuleTest ruleTest) {
         final RuleDetail rule = ruleMapper.getRule(ruleTest.getRuleId());
-        loadRule(rule);
+        convertRule(rule);
 
         final AbstractRule engineRule = ruleEngine.getRule(rule.getCode());
         final Collection<Element> elements = engineRule.collectParameter();
@@ -209,11 +217,12 @@ public class RuleServiceImpl implements RuleService {
                 .update();
 
         final RuleDetail rule = ruleMapper.getRule(ruleId);
-        loadRule(rule);
+        ruleEngine.addRule(convertRule(rule));
         return Boolean.TRUE;
     }
 
-    private void loadRule(RuleDetail rule) {
+    @Override
+    public AbstractRule convertRule(RuleDetail rule) {
         final Collection<Long> eleIds = rule.collectorElement(variableParamManager);
         final Map<Long, RuleEngineElement> elementMap = getElementMap(eleIds);
         final Collection<Long> varIds = rule.collectorVariable(variableParamManager);
@@ -223,7 +232,8 @@ public class RuleServiceImpl implements RuleService {
         Value action = getValue(rule.getAction(), elementMap, varMap, varParamMap);
 
         AbstractCondition condition = getConditonSet(rule.getConditionGroups(), elementMap, varMap, varParamMap);
-        ruleEngine.addRule(new Rule(rule.getCode(), condition, action));
+
+        return new Rule(rule.getCode(), condition, action);
     }
 
     private Map<Long, RuleEngineElement> getElementMap(Collection<Long> eleIds) {
