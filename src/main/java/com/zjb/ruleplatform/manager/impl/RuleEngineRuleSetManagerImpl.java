@@ -7,8 +7,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
- * @author 赵静波
- * @date 2021-01-27 18:29:32
+ * <p>
+ * 规则表engine_set 服务实现类
+ * </p>
+ *
+ * @author zhaojingbo
+ * @since 2021-03-07
  */
 @Service
 public class RuleEngineRuleSetManagerImpl extends ServiceImpl<RuleEngineRuleSetMapper, RuleEngineRuleSet> implements RuleEngineRuleSetManager {

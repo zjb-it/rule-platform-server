@@ -321,7 +321,7 @@ public class RuleServiceImpl implements RuleService {
         if (dataTypeEnum != null) {
             switch (dataTypeEnum) {
                 case STRING:
-                    return new Constant(dataTypeEnum, action.getValue());
+                    return Constant.stringValue(action.getValue());
                 case NUMBER:
                     return new Constant(dataTypeEnum, NumberUtils.createNumber(action.getValue()));
                 case POJO:

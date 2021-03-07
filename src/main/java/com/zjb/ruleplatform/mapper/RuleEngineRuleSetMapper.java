@@ -4,8 +4,12 @@ import com.zjb.ruleplatform.entity.RuleEngineRuleSet;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
- * @author 赵静波
- * @date 2021-01-27 18:29:32
+ * <p>
+ * 规则表engine_set Mapper 接口
+ * </p>
+ *
+ * @author zhaojingbo
+ * @since 2021-03-07
  */
 public interface RuleEngineRuleSetMapper extends BaseMapper<RuleEngineRuleSet> {
 
