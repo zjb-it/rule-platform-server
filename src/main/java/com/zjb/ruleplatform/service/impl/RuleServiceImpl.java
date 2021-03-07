@@ -179,8 +179,7 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public Object testRule(RuleTest ruleTest) {
         final RuleDetail rule = ruleMapper.getRule(ruleTest.getRuleId());
-        convertRule(rule);
-
+        ruleEngine.addRule(convertRule(rule));
         final AbstractRule engineRule = ruleEngine.getRule(rule.getCode());
         final Collection<Element> elements = engineRule.collectParameter();
         final Map<String, Element> elementMap = elements.stream().collect(Collectors.toMap(Element::getCode, Function.identity()));
