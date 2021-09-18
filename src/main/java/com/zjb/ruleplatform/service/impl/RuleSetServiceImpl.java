@@ -20,6 +20,7 @@ import com.zjb.ruleplatform.service.RuleSetService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,9 +75,13 @@ public class RuleSetServiceImpl implements RuleSetService {
     @Override
     public PageResult<RuleSetDef> pageRuleSet(PageRequest<String> pageRequest) {
 
-        final Page<RuleEngineRuleSet> page = ruleSetManager.lambdaQuery()
-                .eq(RuleEngineRuleSet::getCodeName, pageRequest.getQuery())
-                .page(new Page<>(pageRequest.getPage().getPageIndex(), pageRequest.getPage().getPageSize()));
+        LambdaQueryWrapper<RuleEngineRuleSet> queryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(pageRequest.getQuery())) {
+            queryWrapper.like(RuleEngineRuleSet::getCodeName, pageRequest.getQuery());
+        }
+
+        final Page<RuleEngineRuleSet> page = ruleSetManager
+                .page(new Page<>(pageRequest.getPage().getPageIndex(), pageRequest.getPage().getPageSize()),queryWrapper);
         PageResult<RuleSetDef> result = new PageResult<>();
         result.setTotal(page.getTotal());
         final List<RuleEngineRuleSet> records = page.getRecords();

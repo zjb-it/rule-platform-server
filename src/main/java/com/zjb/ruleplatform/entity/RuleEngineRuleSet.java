@@ -74,14 +74,14 @@ import lombok.EqualsAndHashCode;
      * 1-逐个执行全部命中规则
 ，
      */
-      private Integer hitPolicy;
+      private String hitPolicy;
 
       /**
      *  默认规则策略,0-无论是否有规则命中都在最后执行,
    1-当无规则命中时执行,有规则命中则不执行
 ，
      */
-      private Integer defaultRulePolicy;
+      private String defaultRulePolicy;
 
       /**
      * 创建时间，
@@ -96,7 +96,7 @@ import lombok.EqualsAndHashCode;
       /**
      * ，
      */
-      @TableLogic
+      //@TableLogic
     private Boolean deleted;
 
       /**

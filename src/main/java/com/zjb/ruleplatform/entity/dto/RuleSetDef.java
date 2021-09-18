@@ -29,4 +29,8 @@ public class RuleSetDef {
      * ，
      */
     private String description;
+
+    private String hitPolicy;
+
+    private String defaultRulePolicy;
 }

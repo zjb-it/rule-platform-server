@@ -24,7 +24,7 @@ public class GeneratorMybatisPlus {
         String packageName = "com.zjb.ruleplatform";
         boolean serviceNameStartWithI = false;//user -> UserService, 设置成true: user -> IUserService
 
-        String dbUrl = "jdbc:mysql://47.92.98.61:3306/rule";
+        String dbUrl = "spring.datasource.url=jdbc:mysql://192.168.15.106:3308/ds_org_merchant?serverTimezone=Asia/Shanghai&useSSL=false&unicode=true&characterEncoding=UTF-8";
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig
                 .setUrl(dbUrl)
